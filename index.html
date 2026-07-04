@@ -97,6 +97,42 @@
   .backbtn:active{transform:translateY(3px); box-shadow:0 2px 0 #e7c79a, var(--shadow-sm);}
   .subtabs.solo{display:none;}   /* activity categories have no game mode */
 
+  /* ---- cooking game ---- */
+  .cooking{width:100%; max-width:640px; margin:0 auto; padding:0 4px 30px; animation:fade .3s ease;}
+  .cooking.hidden{display:none;}
+  .coins{font-weight:800; font-size:clamp(1.1rem,5vw,1.4rem); color:#a9791f; text-align:center; margin-bottom:8px;}
+  .cook-stage{background:linear-gradient(180deg,#ffffff,#fff4e2); border-radius:26px; padding:16px 14px 18px;
+    box-shadow:var(--shadow-lg), inset 0 2px 3px rgba(255,255,255,.9); text-align:center; margin-bottom:14px;}
+  .pot{min-height:88px; border-radius:20px; background:radial-gradient(120% 80% at 50% 0%, #fff, #ffe7c9);
+    box-shadow:inset 0 3px 8px rgba(150,100,50,.25); display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center;
+    padding:12px; font-size:clamp(1.8rem,8vw,2.4rem);}
+  .pot .ph{color:var(--muted); font-size:.95rem; font-weight:700;}
+  .pot .pi{animation:rpop .4s;}
+  .method-pick{margin:10px 0 4px; font-weight:800; color:#6a563f; min-height:1.4em;}
+  .cook-actions{display:flex; gap:10px; justify-content:center; margin-top:10px;}
+  .cbtn{border:none; cursor:pointer; font-family:inherit; font-weight:800; font-size:clamp(1rem,4.5vw,1.25rem);
+    padding:14px 22px; border-radius:18px; color:#fff; transition:transform .08s, box-shadow .08s;}
+  .cbtn.cook{background:linear-gradient(180deg,#ffb64d,#ff8f1f); box-shadow:0 7px 0 #d9741a, var(--shadow-sm);}
+  .cbtn.clear{background:linear-gradient(180deg,#c9b8ac,#a9968a); box-shadow:0 7px 0 #8a7666, var(--shadow-sm);}
+  .cbtn.eat{background:linear-gradient(180deg,#8ce99a,#54c96a); box-shadow:0 7px 0 #3ba24f, var(--shadow-sm);}
+  .cbtn.sell{background:linear-gradient(180deg,#ffd166,#f2b21f); box-shadow:0 7px 0 #cf9412, var(--shadow-sm); color:#5a3d0b;}
+  .cbtn:active{transform:translateY(4px); box-shadow:0 3px 0 rgba(0,0,0,.2), var(--shadow-sm);}
+  .result{min-height:10px; margin-top:12px;}
+  .result .dish{font-size:clamp(4rem,22vw,6rem); line-height:1; animation:rpop .5s;}
+  .result .dname{font-weight:800; font-size:clamp(1.1rem,5vw,1.5rem); color:#5a3d2b; margin-top:4px;}
+  .result .dprice{color:#a9791f; font-weight:800; margin-top:2px;}
+  .pal-title{font-weight:800; color:#5a3d2b; margin:14px 6px 8px; font-size:clamp(1rem,4.2vw,1.2rem);}
+  .ings{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px;}
+  .methods{display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px;}
+  .ing,.meth{border:none; cursor:pointer; font-family:inherit; border-radius:16px; background:linear-gradient(180deg,#fff,#fff2df);
+    box-shadow:0 5px 0 #e7c79a, var(--shadow-sm); padding:10px 4px; transition:transform .08s, box-shadow .08s;
+    display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .ing .ie{font-size:clamp(1.8rem,8vw,2.2rem);} .ing .il{font-size:.62rem; color:var(--muted); font-weight:700;}
+  .meth .me{font-size:clamp(1.8rem,8vw,2.2rem);} .meth .ml{font-size:.72rem; color:var(--muted); font-weight:700;}
+  .ing:active,.meth:active{transform:translateY(3px); box-shadow:0 2px 0 #e7c79a, var(--shadow-sm);}
+  .meth.sel{background:linear-gradient(180deg,#7db8ff,#4a97dd); box-shadow:0 5px 0 #3877b3, var(--shadow-sm);}
+  .meth.sel .me, .meth.sel .ml{color:#fff;}
+
   /* ---- 3D learn grid ---- */
   .grid{
     display:grid; gap:16px 14px; perspective:1000px;
@@ -255,6 +291,7 @@
 
 <div id="home"></div>
 <main id="main"></main>
+<div id="cooking" class="cooking hidden"></div>
 <footer>สร้างเพื่อการเรียนรู้ • เสียงในเครื่อง (Web Speech) • เล่นได้ทุกอุปกรณ์</footer>
 
 <div class="viewer" id="viewer">
@@ -396,6 +433,40 @@ const CATEGORIES = [
   {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก"},
   // 🎮 เกม & กิจกรรม
   {id:"daily", label:"กิจวัตรประจำวัน", icon:"🪥", type:"pic", group:"play", activity:true},
+  {id:"cooking", label:"เกมทำอาหาร", icon:"🍳", group:"play", cooking:true},
+];
+
+/* --- cooking game data (free-play, Thai + international) --- */
+const COOK_INGS = [
+  {e:"🥚",n:"ไข่"},{e:"🍚",n:"ข้าว"},{e:"🍜",n:"เส้นก๋วยเตี๋ยว"},{e:"🍝",n:"เส้นสปาเกตตี"},
+  {e:"🥩",n:"เนื้อ"},{e:"🍗",n:"ไก่"},{e:"🐟",n:"ปลา"},{e:"🦐",n:"กุ้ง"},
+  {e:"🥬",n:"ผักกาด"},{e:"🥕",n:"แครอท"},{e:"🍅",n:"มะเขือเทศ"},{e:"🧅",n:"หัวหอม"},
+  {e:"🧄",n:"กระเทียม"},{e:"🌶️",n:"พริก"},{e:"🥔",n:"มันฝรั่ง"},{e:"🧀",n:"ชีส"},
+  {e:"🍞",n:"ขนมปัง"},{e:"🥛",n:"นม"},{e:"🍄",n:"เห็ด"},{e:"🌽",n:"ข้าวโพด"},
+  {e:"🥦",n:"บรอกโคลี"},{e:"🍋",n:"มะนาว"},
+];
+const COOK_METHODS = [
+  {id:"fry",e:"🍳",n:"ทอด/ผัด"},{id:"boil",e:"🍲",n:"ต้ม"},{id:"grill",e:"🔥",n:"ย่าง/อบ"},
+  {id:"fresh",e:"🔪",n:"หั่นสด"},{id:"blend",e:"🥣",n:"ปั่น/ผสม"},
+];
+const COOK_RECIPES = [
+  {need:["🥚"],m:"fry",e:"🍳",n:"ไข่ดาว",price:20},
+  {need:["🍚","🥚"],m:"fry",e:"🍛",n:"ข้าวผัด",price:45},
+  {need:["🥬"],m:"fry",e:"🥘",n:"ผัดผัก",price:35},
+  {need:["🍞","🥩"],m:"fry",e:"🍔",n:"เบอร์เกอร์",price:70},
+  {need:["🥔"],m:"fry",e:"🍟",n:"เฟรนช์ฟรายส์",price:30},
+  {need:["🦐","🌶️","🍋"],m:"boil",e:"🍲",n:"ต้มยำกุ้ง",price:90},
+  {need:["🍜"],m:"boil",e:"🍜",n:"ก๋วยเตี๋ยว",price:45},
+  {need:["🍝","🍅"],m:"boil",e:"🍝",n:"สปาเกตตี",price:60},
+  {need:["🥕"],m:"boil",e:"🍲",n:"ซุปผัก",price:30},
+  {need:["🍗"],m:"grill",e:"🍗",n:"ไก่ย่าง",price:55},
+  {need:["🐟"],m:"grill",e:"🐟",n:"ปลาย่าง",price:50},
+  {need:["🍞","🧀","🍅"],m:"grill",e:"🍕",n:"พิซซ่า",price:95},
+  {need:["🌽"],m:"grill",e:"🍿",n:"ป๊อปคอร์น",price:20},
+  {need:["🥬","🍅"],m:"fresh",e:"🥗",n:"สลัด",price:40},
+  {need:["🍞","🧀"],m:"fresh",e:"🥪",n:"แซนด์วิช",price:35},
+  {need:["🥛"],m:"blend",e:"🥤",n:"มิลค์เชค",price:25},
+  {need:["🍋"],m:"blend",e:"🧃",n:"น้ำมะนาว",price:15},
 ];
 const GROUPS = [
   {id:"learn", label:"📚 เรียนรู้", hint:"แตะเพื่อฟังเสียง เล่นเกมทายเสียง"},
@@ -422,6 +493,8 @@ function sfx(type){
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.9,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.22); o.start(t); o.stop(t+.24); }
   else if(type==="boing"){ o.type="sine"; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(660,t+.08); o.frequency.exponentialRampToValueAtTime(180,t+.32);
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.9,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.4); o.start(t); o.stop(t+.42); }
+  else if(type==="coin"){ o.type="square"; o.frequency.setValueAtTime(880,t); o.frequency.setValueAtTime(1320,t+.08);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.7,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.3); o.start(t); o.stop(t+.32); }
   else { o.type="square"; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(120,t+.2);
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.6,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.25); o.start(t); o.stop(t+.27); }
 }
@@ -492,6 +565,7 @@ GROUPS.forEach(gr=>{
 
 /* --- category panels (learn grid + game) --- */
 CATEGORIES.forEach(cat=>{
+  if(cat.cooking) return;   // cooking has its own dedicated screen (no learn/game panel)
   const panel = document.createElement("section");
   panel.className = "cat-panel"; panel.id = "cat-"+cat.id;
 
@@ -605,10 +679,15 @@ function selectCat(catId){
   catbarEl.classList.remove("hidden");
   appTitle.textContent = cat.icon+" "+cat.label;
   appSub.classList.add("hidden");
+  document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
+  window.scrollTo(0,0);
+  if(cat.cooking){                          // cooking game screen
+    subtabsEl.style.display="none"; Cooking.open(); return;
+  }
+  Cooking.close(); subtabsEl.style.display="";
   subtabsEl.classList.toggle("solo", !!cat.activity);   // activity = no game mode
   document.querySelectorAll(".subtab").forEach(x=>x.classList.toggle("active", x.dataset.mode==="learn"));
-  document.querySelectorAll(".cat-panel").forEach(p=>p.classList.toggle("active", p.id==="cat-"+catId));
-  window.scrollTo(0,0);
+  document.getElementById("cat-"+catId).classList.add("active");
   applyMode();
 }
 function goHome(){
@@ -616,7 +695,9 @@ function goHome(){
   catbarEl.classList.add("hidden");
   appTitle.textContent="เรียนรู้พาสนุก 🎈";
   appSub.classList.remove("hidden");
+  subtabsEl.style.display="";
   document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
+  Cooking.close();
   window.scrollTo(0,0);
 }
 function applyMode(){
@@ -743,6 +824,97 @@ const Viewer = (function(){
   document.getElementById("vclose").addEventListener("click", (e)=>{ e.stopPropagation(); close(); });
   window.addEventListener("keydown", e=>{ if(e.key==="Escape" && el.classList.contains("show")) close(); });
 
+  return { open, close };
+})();
+
+/* ================= COOKING GAME (free play) ================= */
+const Cooking = (function(){
+  const el=document.getElementById("cooking");
+  let built=false, pot=[], method=null, result=null;
+  let coins=parseInt(localStorage.getItem("cook_coins")||"0",10);
+  let potEl, methodPickEl, resultEl, coinEl, ingsEl, methodsEl;
+
+  function build(){
+    el.innerHTML=`
+      <div class="coins">🪙 เหรียญ: <span id="coinv">${coins}</span></div>
+      <div class="cook-stage">
+        <div class="pot" id="pot"></div>
+        <div class="method-pick" id="methodPick"></div>
+        <div class="cook-actions">
+          <button class="cbtn cook" id="cookBtn">🍳 ปรุง!</button>
+          <button class="cbtn clear" id="clearBtn">🗑️ ล้าง</button>
+        </div>
+        <div class="result" id="result"></div>
+      </div>
+      <div class="pal-title">🧺 เลือกวัตถุดิบ (แตะใส่หม้อ)</div>
+      <div class="ings" id="ings"></div>
+      <div class="pal-title">🔧 เลือกวิธีทำ</div>
+      <div class="methods" id="methods"></div>`;
+    potEl=el.querySelector("#pot"); methodPickEl=el.querySelector("#methodPick");
+    resultEl=el.querySelector("#result"); coinEl=el.querySelector("#coinv");
+    ingsEl=el.querySelector("#ings"); methodsEl=el.querySelector("#methods");
+    COOK_INGS.forEach(ing=>{
+      const b=document.createElement("button"); b.className="ing";
+      b.innerHTML=`<span class="ie">${ing.e}</span><span class="il">${ing.n}</span>`;
+      b.addEventListener("click",()=>addIng(ing)); ingsEl.appendChild(b);
+    });
+    COOK_METHODS.forEach(mth=>{
+      const b=document.createElement("button"); b.className="meth";
+      b.innerHTML=`<span class="me">${mth.e}</span><span class="ml">${mth.n}</span>`;
+      b.addEventListener("click",()=>pickMethod(mth,b)); methodsEl.appendChild(b);
+    });
+    el.querySelector("#cookBtn").addEventListener("click",cook);
+    el.querySelector("#clearBtn").addEventListener("click",clearAll);
+    built=true;
+  }
+  function renderPot(){
+    if(pot.length===0){ potEl.innerHTML=`<span class="ph">ใส่วัตถุดิบลงหม้อได้เลย…</span>`; return; }
+    potEl.innerHTML=pot.map(e=>`<span class="pi">${e}</span>`).join("");
+  }
+  function addIng(ing){ if(pot.length>=6) return; ensureAudio(); sfx("pop"); pot.push(ing.e); renderPot(); }
+  function pickMethod(mth,b){
+    ensureAudio(); sfx("pop"); method=mth;
+    [...methodsEl.children].forEach(x=>x.classList.toggle("sel",x===b));
+    methodPickEl.textContent="วิธีทำ: "+mth.n;
+  }
+  function findRecipe(){
+    let best=null;
+    COOK_RECIPES.forEach(r=>{
+      if(method && r.m!==method.id) return;
+      if(r.need.every(x=>pot.includes(x))){ if(!best||r.need.length>best.need.length) best=r; }
+    });
+    return best;
+  }
+  function cook(){
+    ensureAudio();
+    if(pot.length===0){ methodPickEl.textContent="ใส่วัตถุดิบก่อนนะ 😋"; sfx("thud"); return; }
+    if(!method){ methodPickEl.textContent="เลือกวิธีทำก่อนนะ 🔧"; sfx("thud"); return; }
+    sfx("boing");
+    const r=findRecipe();
+    result = r ? {e:r.e,n:r.n,price:r.price} : {e:"🍲",n:"จานสร้างสรรค์พิเศษ",price:10+pot.length*8};
+    resultEl.innerHTML=`
+      <div class="dish">${result.e}</div>
+      <div class="dname">${result.n}</div>
+      <div class="dprice">ขายได้ 🪙 ${result.price}</div>
+      <div class="cook-actions">
+        <button class="cbtn eat" id="eatBtn">😋 กิน</button>
+        <button class="cbtn sell" id="sellBtn">💰 ขาย</button>
+      </div>`;
+    speak(result.n, true); celebrate(false);
+    resultEl.querySelector("#eatBtn").addEventListener("click",eat);
+    resultEl.querySelector("#sellBtn").addEventListener("click",sell);
+  }
+  function eat(){ sfx("boing"); speak("อร่อยจัง อิ่มแล้ว", true); celebrate(true); clearAll(); }
+  function sell(){
+    coins+=result.price; localStorage.setItem("cook_coins",String(coins)); coinEl.textContent=coins;
+    sfx("coin"); speak("ขายได้ "+result.price+" เหรียญ", true); celebrate(true); clearAll();
+  }
+  function clearAll(){
+    pot=[]; method=null; result=null; renderPot(); if(methodPickEl) methodPickEl.textContent=""; if(resultEl) resultEl.innerHTML="";
+    if(methodsEl)[...methodsEl.children].forEach(x=>x.classList.remove("sel"));
+  }
+  function open(){ ensureAudio(); if(!built) build(); coinEl.textContent=coins; clearAll(); el.classList.remove("hidden"); }
+  function close(){ el.classList.add("hidden"); }
   return { open, close };
 })();
 
