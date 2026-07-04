@@ -501,30 +501,41 @@ const Viewer = (function(){
   }
   function emojiCP(e){ const raw = e.indexOf("‍")<0 ? e.replace(/️/g,"") : e; return toCodePoint(raw); }
 
-  function makeFaceTexture(emoji, col){
+  // transparent texture with just the emoji (real Twemoji image so it works on every device)
+  function makeEmojiTexture(emoji){
     const s=512, c=document.createElement("canvas"); c.width=c.height=s;
     const x=c.getContext("2d");
-    function drawCard(){
-      x.clearRect(0,0,s,s);
-      const r=90; x.fillStyle=col;
-      x.beginPath();
-      x.moveTo(r,20); x.arcTo(s-20,20,s-20,s-20,r); x.arcTo(s-20,s-20,20,s-20,r);
-      x.arcTo(20,s-20,20,20,r); x.arcTo(20,20,s-20,20,r); x.closePath(); x.fill();
-      const grd=x.createLinearGradient(0,20,0,s/2); grd.addColorStop(0,"rgba(255,255,255,.55)"); grd.addColorStop(1,"rgba(255,255,255,0)");
-      x.fillStyle=grd; x.fill();
-    }
     function drawTextEmoji(){
-      x.font='300px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
+      x.clearRect(0,0,s,s);
+      x.font='420px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
       x.textAlign="center"; x.textBaseline="middle"; x.fillText(emoji, s/2, s/2+20);
     }
-    drawCard();
     const tex=new THREE.CanvasTexture(c); tex.anisotropy=4;
-    // load real emoji image (Twemoji) so it shows on every device
     const img=new Image(); img.crossOrigin="anonymous";
-    img.onload=()=>{ drawCard(); const sz=330, o=(s-sz)/2; try{ x.drawImage(img,o,o+12,sz,sz);}catch(e){ drawTextEmoji(); } tex.needsUpdate=true; };
-    img.onerror=()=>{ drawCard(); drawTextEmoji(); tex.needsUpdate=true; };
+    img.onload=()=>{ x.clearRect(0,0,s,s); const sz=480, o=(s-sz)/2; try{ x.drawImage(img,o,o,sz,sz);}catch(e){ drawTextEmoji(); } tex.needsUpdate=true; };
+    img.onerror=()=>{ drawTextEmoji(); tex.needsUpdate=true; };
     img.src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+emojiCP(emoji)+".svg";
     return tex;
+  }
+
+  // build a SOLID 3D model by stacking many alpha-cut slices of the emoji through depth
+  const SIZE=2.8, DEPTH=1.0, LAYERS=64;
+  let sliceGeo=null;
+  function buildModel(tex){
+    if(!sliceGeo) sliceGeo=new THREE.PlaneGeometry(SIZE,SIZE);
+    const g=new THREE.Group();
+    for(let i=0;i<LAYERS;i++){
+      const m=new THREE.MeshBasicMaterial({map:tex, alphaTest:0.5, side:THREE.DoubleSide});
+      const p=new THREE.Mesh(sliceGeo, m);
+      p.position.z = -DEPTH/2 + DEPTH*(i/(LAYERS-1));
+      g.add(p);
+    }
+    g.userData.tex=tex;
+    return g;
+  }
+  function disposeModel(g){
+    g.traverse(o=>{ if(o.material){ o.material.dispose(); } });
+    if(g.userData.tex && g.userData.tex.dispose) g.userData.tex.dispose();
   }
 
   function init(){
@@ -548,9 +559,9 @@ const Viewer = (function(){
     const w=el.clientWidth, h=el.clientHeight, aspect=w/h;
     renderer.setSize(w,h); camera.aspect=aspect;
     const vfov=camera.fov*Math.PI/180;
-    const distH=(BOX*0.56)/Math.tan(vfov/2);
-    const distW=(BOX*0.56)/(Math.tan(vfov/2)*aspect);
-    camera.position.z=Math.max(distH,distW,3.0);
+    const distH=(SIZE*0.62)/Math.tan(vfov/2);
+    const distW=(SIZE*0.62)/(Math.tan(vfov/2)*aspect);
+    camera.position.z=Math.max(distH,distW,3.2);
     camera.updateProjectionMatrix();
   }
 
@@ -560,7 +571,7 @@ const Viewer = (function(){
   }
   function hitMesh(ev){
     const p=ndc(ev); const rc=new THREE.Raycaster(); rc.setFromCamera(new THREE.Vector2(p.x,p.y),camera);
-    return rc.intersectObject(mesh).length>0;
+    return rc.intersectObject(mesh, true).length>0;
   }
   function onDown(ev){ if(!el.classList.contains("show"))return; dragging=true; moved=false; lastX=downX=ev.clientX; lastY=downY=ev.clientY; }
   function onMove(ev){
@@ -582,12 +593,8 @@ const Viewer = (function(){
     if(!ready) init();
     cur=item; behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"?"drive":"spin");
     nameEl.textContent=item.label;
-    const col=CARD_COLORS[(Math.random()*CARD_COLORS.length)|0];
-    const side=new THREE.MeshStandardMaterial({color:col, roughness:.7, metalness:0});
-    const face=new THREE.MeshBasicMaterial({map:makeFaceTexture(item.emoji,col)});
-    if(mesh){ scene.remove(mesh); mesh.geometry.dispose(); }
-    const geo=new THREE.BoxGeometry(BOX,BOX,1.0);
-    mesh=new THREE.Mesh(geo,[side,side,side,side,face,face]); // +x,-x,+y,-y,+z,-z
+    if(mesh){ scene.remove(mesh); disposeModel(mesh); }
+    mesh=buildModel(makeEmojiTexture(item.emoji));
     scene.add(mesh);
     el.classList.add("show");
     fit(); baseY=0; t0=performance.now()/1000; autoSpin=0;
