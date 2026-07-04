@@ -448,6 +448,41 @@ const CARJOBS = [
   {n:"รถไฟ",e:"🚆",use:"วิ่งบนราง"},{n:"จักรยาน",e:"🚲",use:"ปั่นออกกำลังกาย"},
 ];
 
+/* --- characteristic sound archetype per item (played when tapped) --- */
+const ANIMAL_SOUND = {
+  "สุนัข":"bark","แมว":"meow","ช้าง":"trumpet","ม้า":"neigh","วัว":"moo","ควาย":"moo",
+  "หมู":"oink","ไก่":"cluck","ลูกเจี๊ยบ":"tweet","เป็ด":"quack","ห่าน":"honk_goose","ไก่งวง":"gobble",
+  "นก":"tweet","นกแก้ว":"squawk","นกยูง":"squawk","นกฮูก":"hoot","นกอินทรี":"screech","เพนกวิน":"honk_goose",
+  "ค้างคาว":"screech","ปลา":"splash","ปลาเขตร้อน":"splash","ฉลาม":"splash","ปลาวาฬ":"splash","โลมา":"squeak",
+  "แมวน้ำ":"honk_goose","ปลาหมึก":"splash","กุ้ง":"splash","ปู":"splash","หอย":"splash","หอยทาก":"splash",
+  "กบ":"croak","งู":"hiss","จระเข้":"hiss","เต่า":"splash","จิ้งจก":"hiss","ไดโนเสาร์":"roar",
+  "เสือ":"roar","เสือดาว":"roar","สิงโต":"roar","หมี":"growl","หมีขั้วโลก":"growl","แพนด้า":"growl",
+  "โคอาลา":"squeak","ลิง":"monkey","กอริลลา":"monkey","ยีราฟ":"moo","ม้าลาย":"neigh","แรด":"growl",
+  "ฮิปโป":"growl","อูฐ":"moo","จิงโจ้":"squeak","กวาง":"bleat","แกะ":"bleat","แพะ":"bleat",
+  "กระต่าย":"squeak","หนู":"squeak","เม่น":"squeak","สุนัขจิ้งจอก":"bark","หมาป่า":"howl","ผึ้ง":"buzz",
+  "ผีเสื้อ":"tweet","เต่าทอง":"buzz","มด":"buzz","แมงมุม":"hiss",
+};
+const VEHICLE_SOUND = {
+  "รถยนต์":"honk","รถสปอร์ต":"engine_rev","รถแท็กซี่":"honk","รถตู้":"engine","รถบัส":"honk_low","รถโดยสาร":"honk_low",
+  "รถราง":"bell","รถบรรทุก":"honk_low","รถสิบล้อ":"honk_low","รถพ่วง":"honk_low","รถตำรวจ":"siren_police",
+  "รถพยาบาล":"siren_ambulance","รถดับเพลิง":"siren_fire","รถแทรกเตอร์":"engine_rough","ตุ๊กตุ๊ก":"engine_putt",
+  "จักรยาน":"bike_bell","สกู๊ตเตอร์":"engine_small","มอเตอร์ไซค์":"engine_rev","รถไฟ":"train_chug","รถไฟหัวจักร":"train_whistle",
+  "รถไฟความเร็วสูง":"train_chug","รถไฟฟ้า":"train_chug","รถไฟใต้ดิน":"train_chug","โมโนเรล":"train_chug",
+  "กระเช้าลอยฟ้า":"bell","กระเช้าไฟฟ้า":"bell","เครื่องบิน":"plane","เครื่องบินเล็ก":"plane","เฮลิคอปเตอร์":"helicopter",
+  "จรวด":"rocket","จานบิน":"whoosh","ร่มชูชีพ":"whoosh","เรือใบ":"boat_horn","เรือเร็ว":"boat_horn","เรือแคนู":"splash",
+  "เรือข้ามฟาก":"boat_horn","เรือใหญ่":"boat_horn","เรือ":"boat_horn",
+};
+const LETTER_SOUND = {
+  "ก":"cluck","ค":"moo","ง":"hiss","ช":"trumpet","น":"squeak","ป":"splash","ผ":"buzz","ม":"neigh","ล":"monkey","ส":"roar","ฮ":"hoot",
+};
+function soundKindFor(catId, item){
+  if(!item) return null;
+  if(catId==="animals") return ANIMAL_SOUND[item.label];
+  if(catId==="vehicles" || catId==="carjobs") return VEHICLE_SOUND[item.label];
+  if(catId==="letters") return LETTER_SOUND[item.key];
+  return null;
+}
+
 const norm = {
   letters: LETTERS.map(L=>({big:L.c, emoji:L.e, label:L.c+" "+L.w, say:L.say, key:L.c})),
   colors:  COLORS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
@@ -545,6 +580,80 @@ function sfx(type){
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.7,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.3); o.start(t); o.stop(t+.32); }
   else { o.type="square"; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(120,t+.2);
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.6,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.25); o.start(t); o.stop(t+.27); }
+}
+
+/* ---- characteristic critter/vehicle sound synthesis ---- */
+let noiseBuf=null;
+function getNoiseBuffer(){
+  if(!audioCtx) return null;
+  if(noiseBuf) return noiseBuf;
+  const b=audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
+  const d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  noiseBuf=b; return b;
+}
+function tone(f0,f1,dur,type,peak,t){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.setValueAtTime(f0,t);
+  if(f1!==undefined) o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),t+dur*0.85);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+dur*0.15); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+dur+0.02);
+}
+function noiseBurst(dur,peak,freq,t){
+  const src=audioCtx.createBufferSource(); src.buffer=getNoiseBuffer(); src.loop=true;
+  const f=audioCtx.createBiquadFilter(); f.type="bandpass"; f.frequency.value=freq||1000; f.Q.value=0.9;
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+dur*0.2); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  src.connect(f); f.connect(g); g.connect(audioCtx.destination); src.start(t); src.stop(t+dur+0.02);
+}
+function playCritter(kind){
+  ensureAudio(); if(!audioCtx || !kind) return;
+  const t=audioCtx.currentTime;
+  switch(kind){
+    case "moo": tone(110,80,.9,"sawtooth",.5,t); break;
+    case "meow": tone(500,700,.15,"triangle",.5,t); tone(700,350,.25,"triangle",.5,t+.15); break;
+    case "bark": tone(300,220,.12,"square",.6,t); tone(300,220,.12,"square",.6,t+.18); break;
+    case "howl": tone(300,700,1.1,"sine",.4,t); break;
+    case "growl": noiseBurst(.6,.5,200,t); break;
+    case "roar": noiseBurst(.7,.6,300,t); tone(120,80,.7,"sawtooth",.5,t); break;
+    case "oink": tone(220,150,.12,"square",.5,t); tone(220,150,.12,"square",.5,t+.16); break;
+    case "cluck": tone(500,380,.08,"square",.5,t); tone(600,420,.08,"square",.5,t+.12); break;
+    case "quack": tone(300,220,.1,"sawtooth",.6,t); tone(300,220,.1,"sawtooth",.6,t+.14); break;
+    case "honk_goose": tone(260,180,.3,"sawtooth",.5,t); break;
+    case "gobble": tone(300,200,.08,"triangle",.5,t); tone(320,210,.08,"triangle",.5,t+.1); tone(300,200,.08,"triangle",.5,t+.2); break;
+    case "tweet": tone(1400,1800,.08,"sine",.4,t); tone(1600,1200,.08,"sine",.4,t+.12); break;
+    case "squawk": tone(900,400,.3,"sawtooth",.5,t); break;
+    case "hoot": tone(300,260,.25,"sine",.5,t); tone(280,240,.3,"sine",.5,t+.3); break;
+    case "screech": tone(1800,2600,.35,"sawtooth",.4,t); break;
+    case "hiss": noiseBurst(.5,.4,3500,t); break;
+    case "croak": tone(200,140,.15,"square",.5,t); tone(200,140,.15,"square",.5,t+.2); break;
+    case "buzz": tone(220,240,.5,"sawtooth",.35,t); break;
+    case "splash": noiseBurst(.35,.5,600,t); break;
+    case "neigh": tone(300,600,.35,"sawtooth",.5,t); tone(600,250,.3,"sawtooth",.5,t+.35); break;
+    case "bleat": tone(400,300,.18,"triangle",.5,t); tone(420,320,.18,"triangle",.5,t+.22); break;
+    case "monkey": tone(500,700,.1,"square",.5,t); tone(700,400,.1,"square",.5,t+.14); tone(500,700,.1,"square",.5,t+.28); break;
+    case "squeak": tone(1400,1800,.08,"sine",.4,t); tone(1700,1300,.08,"sine",.4,t+.1); break;
+    case "trumpet": tone(220,600,.4,"sawtooth",.6,t); tone(600,180,.4,"sawtooth",.5,t+.4); break;
+    case "engine": noiseBurst(.4,.3,150,t); break;
+    case "engine_rev": tone(120,260,.35,"sawtooth",.5,t); break;
+    case "engine_rough": noiseBurst(.5,.35,120,t); break;
+    case "engine_putt": tone(140,180,.08,"square",.4,t); tone(140,180,.08,"square",.4,t+.12); tone(140,180,.08,"square",.4,t+.24); break;
+    case "engine_small": tone(300,500,.25,"sawtooth",.4,t); break;
+    case "honk": tone(400,400,.2,"square",.6,t); tone(400,400,.2,"square",.6,t+.26); break;
+    case "honk_low": tone(200,200,.25,"square",.6,t); tone(200,200,.25,"square",.6,t+.32); break;
+    case "bell": tone(1200,900,.3,"sine",.5,t); break;
+    case "bike_bell": tone(1800,1500,.15,"sine",.5,t); tone(1800,1500,.15,"sine",.5,t+.18); break;
+    case "siren_police": tone(500,900,.3,"sine",.5,t); tone(900,500,.3,"sine",.5,t+.3); break;
+    case "siren_ambulance": tone(600,1000,.25,"sine",.55,t); tone(1000,600,.25,"sine",.55,t+.25); break;
+    case "siren_fire": tone(700,300,.5,"sawtooth",.55,t); break;
+    case "train_chug": tone(150,120,.1,"square",.4,t); tone(150,120,.1,"square",.4,t+.14); tone(150,120,.1,"square",.4,t+.28); break;
+    case "train_whistle": tone(500,700,.5,"sine",.5,t); break;
+    case "plane": noiseBurst(.6,.35,2000,t); break;
+    case "helicopter": for(let i=0;i<5;i++) noiseBurst(.08,.35,300,t+i*.09); break;
+    case "rocket": noiseBurst(.7,.5,800,t); tone(150,600,.6,"sawtooth",.4,t); break;
+    case "boat_horn": tone(200,180,.6,"sawtooth",.5,t); break;
+    case "whoosh": noiseBurst(.4,.3,1200,t); break;
+  }
 }
 
 let thaiVoice = null, enVoice = null;
@@ -699,12 +808,13 @@ function choose(catId, btn, item){
     const prevBest = getBest(catId);
     let newBest=false;
     if(g.score > prevBest){ setBest(catId, g.score); g.bestEl.textContent=g.score; newBest=true; }
+    playCritter(soundKindFor(catId, g.current));
     if(newBest && g.score>0 && prevBest>0){
       g.feedbackEl.textContent="ทำลายสถิติ! 🏆 +"+gain;
-      celebrate(true); speak("เยี่ยมมาก ทำลายสถิติ");
+      celebrate(true); setTimeout(()=>speak("เยี่ยมมาก ทำลายสถิติ"),350);
     }else{
       g.feedbackEl.textContent="เก่งมาก! 🎉 "+g.current.label+"  +"+gain;
-      celebrate(false); speak("ถูกต้อง เก่งมาก");
+      celebrate(false); setTimeout(()=>speak("ถูกต้อง เก่งมาก"),350);
     }
     setTimeout(()=>startRound(catId), 1600);
   }else{
@@ -770,7 +880,7 @@ const Viewer = (function(){
   const stage=document.getElementById("stage");
   const hero=document.getElementById("hero");
   const art=document.getElementById("art");
-  let cur=null, curLang=null, behavior="bob", raf=null, t0=0;
+  let cur=null, curLang=null, curCatId=null, behavior="bob", raf=null, t0=0;
   let x=0,y=0,vx=0,vy=0, facing=1;
   const ANIMS=["jump","spin","wobble","pop"];
   const PARTS=["⭐","💖","✨","🌟","🎉","💫"];
@@ -825,7 +935,9 @@ const Viewer = (function(){
     const a=ANIMS[(Math.random()*ANIMS.length)|0];
     art.classList.remove(...ANIMS); void art.offsetWidth; art.classList.add(a);
     particles();
-    sfx("boing"); speak(cur.say, true, curLang);      // loud
+    const kind=soundKindFor(curCatId, cur);
+    if(kind){ playCritter(kind); setTimeout(()=>speak(cur.say, false, curLang), 280); }
+    else { sfx("boing"); speak(cur.say, true, curLang); }
     if(Math.random()<0.55) launch(1.7);       // sometimes dart away like it's playing
   }
   art.parentNode.addEventListener("pointerdown", heroTap);
@@ -849,8 +961,8 @@ const Viewer = (function(){
 
   function open(item, cat){
     ensureAudio();
-    cur=item; curLang=cat.lang||null;
-    behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"?"drive":(cat.id==="daily"?"hop":"bob"));
+    cur=item; curLang=cat.lang||null; curCatId=cat.id;
+    behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"||cat.id==="carjobs"?"drive":(cat.id==="daily"?"hop":"bob"));
     nameEl.textContent=item.label;
     setArt(item.emoji, item.native||cat.native);
     el.classList.add("show");
@@ -858,7 +970,9 @@ const Viewer = (function(){
     x=(W-size)/2; y=(H-size)/2; launch(1);
     t0=performance.now()/1000;
     art.classList.remove(...ANIMS); void art.offsetWidth; art.classList.add("pop");
-    speak(item.say, true, curLang);
+    const kind=soundKindFor(curCatId, item);
+    if(kind){ playCritter(kind); setTimeout(()=>speak(item.say, false, curLang), 280); }
+    else { speak(item.say, true, curLang); }
     if(!raf) loop();
   }
 
