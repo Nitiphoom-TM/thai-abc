@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#fef6e4">
-<title>ก-ฮ พาสนุก 🎈 เรียนพยัญชนะไทย</title>
+<title>เรียนรู้พาสนุก 🎈 ก-ฮ • สัตว์ • ยานพาหนะ</title>
 <style>
   :root{
     --bg1:#fff9f0; --bg2:#fdeecf; --card:#ffffff;
@@ -24,62 +24,72 @@
   }
   header{text-align:center; width:100%; max-width:1100px;}
   h1{
-    font-size:clamp(1.5rem,6vw,2.6rem); margin:.3em 0 .1em;
+    font-size:clamp(1.4rem,5.5vw,2.4rem); margin:.3em 0 .1em;
     font-weight:800; letter-spacing:.5px;
     background:linear-gradient(90deg,var(--pink),var(--orange),var(--blue));
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .subtitle{color:var(--muted); font-size:clamp(.85rem,3.5vw,1.05rem); margin:0 0 10px;}
+  .subtitle{color:var(--muted); font-size:clamp(.8rem,3.3vw,1rem); margin:0 0 10px;}
 
-  /* Tabs */
-  .tabs{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;}
+  .tabs{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px;}
   .tab{
     border:none; cursor:pointer; font-family:inherit; font-weight:700;
-    font-size:clamp(.9rem,3.8vw,1.1rem); padding:10px 20px; border-radius:999px;
+    font-size:clamp(.85rem,3.6vw,1.05rem); padding:10px 18px; border-radius:999px;
     background:var(--card); color:var(--muted); box-shadow:var(--shadow);
     transition:transform .1s, background .2s, color .2s;
   }
   .tab.active{background:linear-gradient(90deg,var(--pink),var(--orange)); color:#fff;}
   .tab:active{transform:scale(.94);}
 
+  .subtabs{display:flex; gap:8px; justify-content:center; margin-bottom:14px;}
+  .subtab{
+    border:none; cursor:pointer; font-family:inherit; font-weight:700;
+    font-size:clamp(.8rem,3.4vw,1rem); padding:8px 18px; border-radius:999px;
+    background:#fff; color:var(--muted); box-shadow:var(--shadow);
+    transition:transform .1s, background .2s, color .2s;
+  }
+  .subtab.active{background:linear-gradient(90deg,var(--blue),var(--purple)); color:#fff;}
+  .subtab:active{transform:scale(.94);}
+
   main{width:100%; max-width:1100px; flex:1;}
-  .panel{display:none; animation:fade .3s ease;}
-  .panel.active{display:block;}
+  .cat-panel{display:none;}
+  .cat-panel.active{display:block;}
+  .mode-panel{display:none; animation:fade .3s ease;}
+  .mode-panel.active{display:block;}
   @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
 
-  /* Learn grid */
   .grid{
     display:grid; gap:10px;
-    grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+    grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
     padding-bottom:24px;
   }
-  .letter{
+  .card{
     background:var(--card); border:none; border-radius:20px; cursor:pointer;
     padding:12px 6px 10px; box-shadow:var(--shadow); font-family:inherit;
     display:flex; flex-direction:column; align-items:center; gap:2px;
-    transition:transform .08s; position:relative; overflow:hidden;
+    transition:transform .08s;
   }
-  .letter:active{transform:scale(.92);}
-  .letter.pop{animation:pop .4s;}
+  .card:active{transform:scale(.92);}
+  .card.pop{animation:pop .4s;}
   @keyframes pop{0%{transform:scale(1);}30%{transform:scale(1.12);}100%{transform:scale(1);}}
-  .letter .big{font-size:clamp(2rem,9vw,2.6rem); font-weight:800; line-height:1; color:var(--ink);}
-  .letter .emoji{font-size:clamp(1.5rem,7vw,2rem); line-height:1;}
-  .letter .word{font-size:clamp(.7rem,3.2vw,.85rem); color:var(--muted); font-weight:600;}
-  .letter:nth-child(6n+1){background:linear-gradient(160deg,#fff,#fff0f3);}
-  .letter:nth-child(6n+2){background:linear-gradient(160deg,#fff,#fff8e6);}
-  .letter:nth-child(6n+3){background:linear-gradient(160deg,#fff,#eefdf0);}
-  .letter:nth-child(6n+4){background:linear-gradient(160deg,#fff,#eef7ff);}
-  .letter:nth-child(6n+5){background:linear-gradient(160deg,#fff,#f5f0ff);}
-  .letter:nth-child(6n+6){background:linear-gradient(160deg,#fff,#fff2e6);}
+  .card .big{font-size:clamp(2rem,9vw,2.6rem); font-weight:800; line-height:1; color:var(--ink);}
+  .card .emoji{font-size:clamp(1.7rem,8vw,2.4rem); line-height:1;}
+  .card .label{font-size:clamp(.72rem,3.2vw,.9rem); color:var(--muted); font-weight:600; text-align:center;}
+  .card:nth-child(6n+1){background:linear-gradient(160deg,#fff,#fff0f3);}
+  .card:nth-child(6n+2){background:linear-gradient(160deg,#fff,#fff8e6);}
+  .card:nth-child(6n+3){background:linear-gradient(160deg,#fff,#eefdf0);}
+  .card:nth-child(6n+4){background:linear-gradient(160deg,#fff,#eef7ff);}
+  .card:nth-child(6n+5){background:linear-gradient(160deg,#fff,#f5f0ff);}
+  .card:nth-child(6n+6){background:linear-gradient(160deg,#fff,#fff2e6);}
 
-  /* Game */
   .game{
     background:var(--card); border-radius:28px; box-shadow:var(--shadow);
     padding:22px 18px 26px; text-align:center; max-width:560px; margin:0 auto;
   }
   .score{display:flex; justify-content:space-around; margin-bottom:14px; font-weight:800;}
   .score .s{font-size:clamp(1rem,4.5vw,1.3rem);}
-  .score .lbl{font-size:.75rem; color:var(--muted); font-weight:600; display:block;}
+  .score .lbl{font-size:.72rem; color:var(--muted); font-weight:600; display:block;}
+  .prompt{color:var(--muted); font-weight:700; margin:0 0 6px; font-size:clamp(.9rem,3.8vw,1.05rem);}
   .play-btn{
     border:none; cursor:pointer; font-family:inherit; font-weight:800;
     font-size:clamp(1.1rem,5vw,1.5rem); color:#fff; padding:18px 26px;
@@ -92,20 +102,19 @@
     border:none; cursor:pointer; font-family:inherit; border-radius:20px;
     background:linear-gradient(160deg,#fff,#fff6e9); box-shadow:var(--shadow);
     padding:16px 8px; display:flex; flex-direction:column; align-items:center; gap:4px;
-    transition:transform .08s;
+    transition:transform .08s; min-height:96px; justify-content:center;
   }
   .choice:active{transform:scale(.93);}
   .choice .big{font-size:clamp(2.2rem,10vw,3rem); font-weight:800;}
-  .choice .emoji{font-size:clamp(1.8rem,8vw,2.4rem);}
+  .choice .emoji{font-size:clamp(2rem,9vw,2.6rem);}
+  .choice .cap{font-size:.72rem; color:var(--muted); font-weight:600;}
   .choice.correct{background:linear-gradient(160deg,#d3f9d8,#8ce99a); animation:pop .4s;}
   .choice.wrong{background:linear-gradient(160deg,#ffe3e3,#ffa8a8);}
   .choice:disabled{cursor:default;}
   .feedback{min-height:30px; font-size:clamp(1.1rem,5vw,1.4rem); font-weight:800; margin-top:14px;}
-  .hint{color:var(--muted); font-size:.9rem; margin:8px 0 0;}
 
-  footer{color:var(--muted); font-size:.78rem; text-align:center; padding:16px 0 8px;}
+  footer{color:var(--muted); font-size:.76rem; text-align:center; padding:16px 0 8px;}
 
-  /* Sound enable overlay */
   .overlay{
     position:fixed; inset:0; background:rgba(255,249,240,.96);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -127,99 +136,90 @@
 
 <div class="overlay" id="overlay">
   <div style="font-size:4rem">🎈🔊</div>
-  <h2>ก-ฮ พาสนุก</h2>
-  <p>แตะปุ่มด้านล่างเพื่อเริ่ม แล้วมาเรียนพยัญชนะไทยกันเลย!</p>
+  <h2>เรียนรู้พาสนุก</h2>
+  <p>แตะปุ่มด้านล่างเพื่อเริ่ม แล้วมาเรียน ก-ฮ สัตว์ และยานพาหนะกันเลย!</p>
   <button class="start-btn" id="startBtn">▶ เริ่มเล่น</button>
 </div>
 
 <header>
-  <h1>ก-ฮ พาสนุก 🎈</h1>
-  <p class="subtitle">แตะตัวอักษรเพื่อฟังเสียง แล้วลองเล่นเกมทายเสียงกัน!</p>
-  <div class="tabs">
-    <button class="tab active" data-tab="learn">📖 เรียนรู้</button>
-    <button class="tab" data-tab="game">🎮 เกมทายเสียง</button>
+  <h1>เรียนรู้พาสนุก 🎈</h1>
+  <p class="subtitle">แตะเพื่อฟังเสียง แล้วลองเล่นเกมทายเสียงกัน!</p>
+  <div class="tabs" id="catTabs"></div>
+  <div class="subtabs">
+    <button class="subtab active" data-mode="learn">📖 เรียนรู้</button>
+    <button class="subtab" data-mode="game">🎮 ทายเสียง</button>
   </div>
 </header>
 
-<main>
-  <section class="panel active" id="learn">
-    <div class="grid" id="grid"></div>
-  </section>
-
-  <section class="panel" id="game">
-    <div class="game">
-      <div class="score">
-        <div class="s"><span class="lbl">คะแนน</span><span id="score">0</span></div>
-        <div class="s"><span class="lbl">ถูกติดต่อกัน</span><span id="streak">0</span> 🔥</div>
-      </div>
-      <button class="play-btn" id="playBtn">🔊 ฟังเสียงอีกครั้ง</button>
-      <p class="hint">ฟังเสียงแล้วเลือกตัวอักษรที่ถูกต้อง</p>
-      <div class="choices" id="choices"></div>
-      <div class="feedback" id="feedback"></div>
-    </div>
-  </section>
-</main>
+<main id="main"></main>
 
 <footer>สร้างเพื่อการเรียนรู้ • ใช้เสียงในเครื่อง (Web Speech) • เปิดได้ทุกอุปกรณ์</footer>
 
 <script>
+/* ================= DATA ================= */
 const LETTERS = [
-  {c:"ก", w:"ไก่", e:"🐔", say:"กอ ไก่"},
-  {c:"ข", w:"ไข่", e:"🥚", say:"ขอ ไข่"},
-  {c:"ฃ", w:"ขวด", e:"🍶", say:"ขอ ขวด"},
-  {c:"ค", w:"ควาย", e:"🐃", say:"คอ ควาย"},
-  {c:"ฅ", w:"คน", e:"🧑", say:"คอ คน"},
-  {c:"ฆ", w:"ระฆัง", e:"🔔", say:"คอ ระฆัง"},
-  {c:"ง", w:"งู", e:"🐍", say:"งอ งู"},
-  {c:"จ", w:"จาน", e:"🍽️", say:"จอ จาน"},
-  {c:"ฉ", w:"ฉิ่ง", e:"🎶", say:"ฉอ ฉิ่ง"},
-  {c:"ช", w:"ช้าง", e:"🐘", say:"ชอ ช้าง"},
-  {c:"ซ", w:"โซ่", e:"⛓️", say:"ซอ โซ่"},
-  {c:"ฌ", w:"เฌอ", e:"🌳", say:"ชอ เฌอ"},
-  {c:"ญ", w:"หญิง", e:"👧", say:"ยอ หญิง"},
-  {c:"ฎ", w:"ชฎา", e:"👑", say:"ดอ ชฎา"},
-  {c:"ฏ", w:"ปฏัก", e:"🔱", say:"ตอ ปะ ตัก"},
-  {c:"ฐ", w:"ฐาน", e:"🛕", say:"ถอ ถาน"},
-  {c:"ฑ", w:"มณโฑ", e:"👸", say:"ทอ มน โท"},
-  {c:"ฒ", w:"ผู้เฒ่า", e:"👴", say:"ทอ ผู้ เฒ่า"},
-  {c:"ณ", w:"เณร", e:"🧑‍🦲", say:"นอ เนน"},
-  {c:"ด", w:"เด็ก", e:"👶", say:"ดอ เด็ก"},
-  {c:"ต", w:"เต่า", e:"🐢", say:"ตอ เต่า"},
-  {c:"ถ", w:"ถุง", e:"🛍️", say:"ถอ ถุง"},
-  {c:"ท", w:"ทหาร", e:"💂", say:"ทอ ทะ หาน"},
-  {c:"ธ", w:"ธง", e:"🚩", say:"ทอ ทง"},
-  {c:"น", w:"หนู", e:"🐭", say:"นอ หนู"},
-  {c:"บ", w:"ใบไม้", e:"🍃", say:"บอ ใบ ไม้"},
-  {c:"ป", w:"ปลา", e:"🐟", say:"ปอ ปลา"},
-  {c:"ผ", w:"ผึ้ง", e:"🐝", say:"ผอ ผึ้ง"},
-  {c:"ฝ", w:"ฝา", e:"🧴", say:"ฝอ ฝา"},
-  {c:"พ", w:"พาน", e:"🏺", say:"พอ พาน"},
-  {c:"ฟ", w:"ฟัน", e:"🦷", say:"ฟอ ฟัน"},
-  {c:"ภ", w:"สำเภา", e:"⛵", say:"พอ สำ เพา"},
-  {c:"ม", w:"ม้า", e:"🐴", say:"มอ ม้า"},
-  {c:"ย", w:"ยักษ์", e:"👹", say:"ยอ ยัก"},
-  {c:"ร", w:"เรือ", e:"🚣", say:"รอ เรือ"},
-  {c:"ล", w:"ลิง", e:"🐒", say:"ลอ ลิง"},
-  {c:"ว", w:"แหวน", e:"💍", say:"วอ แหวน"},
-  {c:"ศ", w:"ศาลา", e:"🏯", say:"สอ สา ลา"},
-  {c:"ษ", w:"ฤๅษี", e:"🧙", say:"สอ รือ สี"},
-  {c:"ส", w:"เสือ", e:"🐅", say:"สอ เสือ"},
-  {c:"ห", w:"หีบ", e:"📦", say:"หอ หีบ"},
-  {c:"ฬ", w:"จุฬา", e:"🪁", say:"ลอ จุ ลา"},
-  {c:"อ", w:"อ่าง", e:"🛁", say:"ออ อ่าง"},
-  {c:"ฮ", w:"นกฮูก", e:"🦉", say:"ฮอ นก ฮูก"},
+  {c:"ก",w:"ไก่",e:"🐔",say:"กอ ไก่"},{c:"ข",w:"ไข่",e:"🥚",say:"ขอ ไข่"},
+  {c:"ฃ",w:"ขวด",e:"🍶",say:"ขอ ขวด"},{c:"ค",w:"ควาย",e:"🐃",say:"คอ ควาย"},
+  {c:"ฅ",w:"คน",e:"🧑",say:"คอ คน"},{c:"ฆ",w:"ระฆัง",e:"🔔",say:"คอ ระฆัง"},
+  {c:"ง",w:"งู",e:"🐍",say:"งอ งู"},{c:"จ",w:"จาน",e:"🍽️",say:"จอ จาน"},
+  {c:"ฉ",w:"ฉิ่ง",e:"🎶",say:"ฉอ ฉิ่ง"},{c:"ช",w:"ช้าง",e:"🐘",say:"ชอ ช้าง"},
+  {c:"ซ",w:"โซ่",e:"⛓️",say:"ซอ โซ่"},{c:"ฌ",w:"เฌอ",e:"🌳",say:"ชอ เฌอ"},
+  {c:"ญ",w:"หญิง",e:"👧",say:"ยอ หญิง"},{c:"ฎ",w:"ชฎา",e:"👑",say:"ดอ ชฎา"},
+  {c:"ฏ",w:"ปฏัก",e:"🔱",say:"ตอ ปะ ตัก"},{c:"ฐ",w:"ฐาน",e:"🛕",say:"ถอ ถาน"},
+  {c:"ฑ",w:"มณโฑ",e:"👸",say:"ทอ มน โท"},{c:"ฒ",w:"ผู้เฒ่า",e:"👴",say:"ทอ ผู้ เฒ่า"},
+  {c:"ณ",w:"เณร",e:"🧑‍🦲",say:"นอ เนน"},{c:"ด",w:"เด็ก",e:"👶",say:"ดอ เด็ก"},
+  {c:"ต",w:"เต่า",e:"🐢",say:"ตอ เต่า"},{c:"ถ",w:"ถุง",e:"🛍️",say:"ถอ ถุง"},
+  {c:"ท",w:"ทหาร",e:"💂",say:"ทอ ทะ หาน"},{c:"ธ",w:"ธง",e:"🚩",say:"ทอ ทง"},
+  {c:"น",w:"หนู",e:"🐭",say:"นอ หนู"},{c:"บ",w:"ใบไม้",e:"🍃",say:"บอ ใบ ไม้"},
+  {c:"ป",w:"ปลา",e:"🐟",say:"ปอ ปลา"},{c:"ผ",w:"ผึ้ง",e:"🐝",say:"ผอ ผึ้ง"},
+  {c:"ฝ",w:"ฝา",e:"🧴",say:"ฝอ ฝา"},{c:"พ",w:"พาน",e:"🏺",say:"พอ พาน"},
+  {c:"ฟ",w:"ฟัน",e:"🦷",say:"ฟอ ฟัน"},{c:"ภ",w:"สำเภา",e:"⛵",say:"พอ สำ เพา"},
+  {c:"ม",w:"ม้า",e:"🐴",say:"มอ ม้า"},{c:"ย",w:"ยักษ์",e:"👹",say:"ยอ ยัก"},
+  {c:"ร",w:"เรือ",e:"🚣",say:"รอ เรือ"},{c:"ล",w:"ลิง",e:"🐒",say:"ลอ ลิง"},
+  {c:"ว",w:"แหวน",e:"💍",say:"วอ แหวน"},{c:"ศ",w:"ศาลา",e:"🏯",say:"สอ สา ลา"},
+  {c:"ษ",w:"ฤๅษี",e:"🧙",say:"สอ รือ สี"},{c:"ส",w:"เสือ",e:"🐅",say:"สอ เสือ"},
+  {c:"ห",w:"หีบ",e:"📦",say:"หอ หีบ"},{c:"ฬ",w:"จุฬา",e:"🪁",say:"ลอ จุ ลา"},
+  {c:"อ",w:"อ่าง",e:"🛁",say:"ออ อ่าง"},{c:"ฮ",w:"นกฮูก",e:"🦉",say:"ฮอ นก ฮูก"},
 ];
 
-/* ---------- Speech ---------- */
+const ANIMALS = [
+  {n:"สุนัข",e:"🐶"},{n:"แมว",e:"🐱"},{n:"ช้าง",e:"🐘"},{n:"ม้า",e:"🐴"},
+  {n:"วัว",e:"🐄"},{n:"ควาย",e:"🐃"},{n:"หมู",e:"🐷"},{n:"ไก่",e:"🐔"},
+  {n:"เป็ด",e:"🦆"},{n:"ปลา",e:"🐟"},{n:"กบ",e:"🐸"},{n:"งู",e:"🐍"},
+  {n:"เสือ",e:"🐅"},{n:"สิงโต",e:"🦁"},{n:"ลิง",e:"🐒"},{n:"กระต่าย",e:"🐰"},
+  {n:"หนู",e:"🐭"},{n:"หมี",e:"🐻"},{n:"แพนด้า",e:"🐼"},{n:"ยีราฟ",e:"🦒"},
+  {n:"ม้าลาย",e:"🦓"},{n:"นก",e:"🐦"},{n:"ผึ้ง",e:"🐝"},{n:"เต่า",e:"🐢"},
+  {n:"ปู",e:"🦀"},{n:"ปลาหมึก",e:"🐙"},{n:"ผีเสื้อ",e:"🦋"},{n:"ไดโนเสาร์",e:"🦕"},
+];
+
+const VEHICLES = [
+  {n:"รถยนต์",e:"🚗"},{n:"รถบัส",e:"🚌"},{n:"รถแท็กซี่",e:"🚕"},{n:"รถบรรทุก",e:"🚚"},
+  {n:"รถตำรวจ",e:"🚓"},{n:"รถพยาบาล",e:"🚑"},{n:"รถดับเพลิง",e:"🚒"},{n:"รถตู้",e:"🚐"},
+  {n:"รถไฟ",e:"🚆"},{n:"รถไฟฟ้า",e:"🚈"},{n:"รถแทรกเตอร์",e:"🚜"},{n:"จักรยาน",e:"🚲"},
+  {n:"มอเตอร์ไซค์",e:"🏍️"},{n:"เครื่องบิน",e:"✈️"},{n:"เฮลิคอปเตอร์",e:"🚁"},{n:"จรวด",e:"🚀"},
+  {n:"เรือใบ",e:"⛵"},{n:"เรือใหญ่",e:"🚢"},
+];
+
+/* normalize into common shape: {big, emoji, label, say, key} */
+const norm = {
+  letters: LETTERS.map(L=>({big:L.c, emoji:L.e, label:L.c+" "+L.w, say:L.say, key:L.c})),
+  animals: ANIMALS.map(A=>({big:A.e, emoji:A.e, label:A.n, say:A.n, key:A.n})),
+  vehicles: VEHICLES.map(V=>({big:V.e, emoji:V.e, label:V.n, say:V.n, key:V.n})),
+};
+
+const CATEGORIES = [
+  {id:"letters", label:"ก-ฮ", icon:"📖", type:"letter", prompt:"ฟังเสียงแล้วเลือกตัวอักษรที่ถูก"},
+  {id:"animals", label:"สัตว์", icon:"🐘", type:"pic", prompt:"ฟังชื่อสัตว์แล้วเลือกรูปที่ถูก"},
+  {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก"},
+];
+
+/* ================= SPEECH ================= */
 let thaiVoice = null;
 function pickVoice(){
   const voices = speechSynthesis.getVoices();
   thaiVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith("th")) || null;
 }
-if("speechSynthesis" in window){
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
-}
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function speak(text){
   if(!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
@@ -229,89 +229,159 @@ function speak(text){
   u.rate = 0.85; u.pitch = 1.05;
   speechSynthesis.speak(u);
 }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
 
-/* ---------- Overlay / start ---------- */
-const overlay = document.getElementById("overlay");
-document.getElementById("startBtn").addEventListener("click", ()=>{
-  overlay.classList.add("hidden");
-  speak("มาเรียน ก ไก่ กันเลย"); // unlock audio on user gesture
-});
+/* ================= BUILD UI ================= */
+const catTabs = document.getElementById("catTabs");
+const mainEl = document.getElementById("main");
+let activeCat = CATEGORIES[0].id;
+let activeMode = "learn";
+const games = {}; // per-category game state
 
-/* ---------- Tabs ---------- */
-document.querySelectorAll(".tab").forEach(tab=>{
-  tab.addEventListener("click", ()=>{
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-    tab.classList.add("active");
-    document.getElementById(tab.dataset.tab).classList.add("active");
-    if(tab.dataset.tab === "game" && !gameStarted){ startRound(); gameStarted = true; }
+CATEGORIES.forEach((cat, idx)=>{
+  // tab
+  const tab = document.createElement("button");
+  tab.className = "tab" + (idx===0?" active":"");
+  tab.dataset.cat = cat.id;
+  tab.textContent = cat.icon + " " + cat.label;
+  tab.addEventListener("click", ()=>selectCat(cat.id));
+  catTabs.appendChild(tab);
+
+  // panel
+  const panel = document.createElement("section");
+  panel.className = "cat-panel" + (idx===0?" active":"");
+  panel.id = "cat-" + cat.id;
+
+  // learn
+  const learn = document.createElement("div");
+  learn.className = "mode-panel learn active";
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  norm[cat.id].forEach(item=>{
+    const b = document.createElement("button");
+    b.className = "card";
+    if(cat.type === "letter"){
+      b.innerHTML = `<span class="emoji">${item.emoji}</span><span class="big">${item.big}</span><span class="label">${item.label}</span>`;
+    }else{
+      b.innerHTML = `<span class="emoji" style="font-size:clamp(2.4rem,11vw,3.4rem)">${item.emoji}</span><span class="label">${item.label}</span>`;
+    }
+    b.addEventListener("click", ()=>{
+      b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+      speak(item.say);
+    });
+    grid.appendChild(b);
+  });
+  learn.appendChild(grid);
+
+  // game
+  const game = document.createElement("div");
+  game.className = "mode-panel game-panel";
+  game.innerHTML = `
+    <div class="game">
+      <div class="score">
+        <div class="s"><span class="lbl">คะแนน</span><span class="score-v">0</span></div>
+        <div class="s"><span class="lbl">ถูกติดต่อกัน</span><span class="streak-v">0</span> 🔥</div>
+      </div>
+      <p class="prompt">${cat.prompt}</p>
+      <button class="play-btn">🔊 ฟังเสียงอีกครั้ง</button>
+      <div class="choices"></div>
+      <div class="feedback"></div>
+    </div>`;
+
+  panel.appendChild(learn);
+  panel.appendChild(game);
+  mainEl.appendChild(panel);
+
+  games[cat.id] = {
+    cat, panel,
+    started:false, answered:false, current:null,
+    score:0, streak:0,
+    choicesEl: game.querySelector(".choices"),
+    feedbackEl: game.querySelector(".feedback"),
+    scoreEl: game.querySelector(".score-v"),
+    streakEl: game.querySelector(".streak-v"),
+  };
+  game.querySelector(".play-btn").addEventListener("click", ()=>{
+    if(games[cat.id].current) speak(games[cat.id].current.say);
   });
 });
 
-/* ---------- Learn grid ---------- */
-const grid = document.getElementById("grid");
-LETTERS.forEach(L=>{
-  const b = document.createElement("button");
-  b.className = "letter";
-  b.innerHTML = `<span class="emoji">${L.e}</span><span class="big">${L.c}</span><span class="word">${L.c} ${L.w}</span>`;
-  b.addEventListener("click", ()=>{
-    b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
-    speak(L.say);
-  });
-  grid.appendChild(b);
-});
-
-/* ---------- Game ---------- */
-let score = 0, streak = 0, current = null, gameStarted = false, answered = false;
-const scoreEl = document.getElementById("score");
-const streakEl = document.getElementById("streak");
-const choicesEl = document.getElementById("choices");
-const feedbackEl = document.getElementById("feedback");
-const playBtn = document.getElementById("playBtn");
-
-function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]];} return a; }
-
-function startRound(){
-  answered = false;
-  feedbackEl.textContent = "";
-  const pool = shuffle(LETTERS);
-  current = pool[0];
-  const options = shuffle([current, pool[1], pool[2], pool[3]]);
-  choicesEl.innerHTML = "";
-  options.forEach(L=>{
+/* ================= GAME LOGIC ================= */
+function startRound(catId){
+  const g = games[catId];
+  g.answered = false;
+  g.feedbackEl.textContent = "";
+  const pool = shuffle(norm[catId]);
+  g.current = pool[0];
+  const options = shuffle([pool[0], pool[1], pool[2], pool[3]]);
+  g.choicesEl.innerHTML = "";
+  options.forEach(item=>{
     const b = document.createElement("button");
     b.className = "choice";
-    b.innerHTML = `<span class="big">${L.c}</span><span class="emoji">${L.e}</span>`;
-    b.addEventListener("click", ()=>choose(b, L));
-    choicesEl.appendChild(b);
+    if(g.cat.type === "letter"){
+      b.innerHTML = `<span class="big">${item.big}</span><span class="emoji" style="font-size:clamp(1.4rem,6vw,1.9rem)">${item.emoji}</span>`;
+    }else{
+      b.innerHTML = `<span class="emoji">${item.emoji}</span>`;
+    }
+    b.dataset.key = item.key;
+    b.addEventListener("click", ()=>choose(catId, b, item));
+    g.choicesEl.appendChild(b);
   });
-  setTimeout(()=>speak(current.say), 350);
+  setTimeout(()=>speak(g.current.say), 350);
 }
 
-function choose(btn, L){
-  if(answered || btn.disabled) return;
-  const buttons = [...choicesEl.children];
-  if(L.c === current.c){
-    answered = true;
+function choose(catId, btn, item){
+  const g = games[catId];
+  if(g.answered || btn.disabled) return;
+  const buttons = [...g.choicesEl.children];
+  if(item.key === g.current.key){
+    g.answered = true;
     btn.classList.add("correct");
-    score++; streak++;
-    feedbackEl.textContent = "เก่งมาก! 🎉 " + current.c + " " + current.w;
+    g.score++; g.streak++;
+    g.feedbackEl.textContent = "เก่งมาก! 🎉 " + g.current.label;
     speak("ถูกต้อง เก่งมาก");
     buttons.forEach(b=>b.disabled=true);
-    setTimeout(startRound, 1400);
+    setTimeout(()=>startRound(catId), 1500);
   }else{
-    // wrong: mark this choice, let the child try again
     btn.classList.add("wrong");
     btn.disabled = true;
-    streak = 0;
-    feedbackEl.textContent = "ลองอีกครั้งนะ 💪";
+    g.streak = 0;
+    g.feedbackEl.textContent = "ลองอีกครั้งนะ 💪";
     speak("ลอง อีก ครั้ง");
   }
-  scoreEl.textContent = score;
-  streakEl.textContent = streak;
+  g.scoreEl.textContent = g.score;
+  g.streakEl.textContent = g.streak;
 }
 
-playBtn.addEventListener("click", ()=>{ if(current) speak(current.say); });
+/* ================= NAVIGATION ================= */
+function selectCat(catId){
+  activeCat = catId;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.cat===catId));
+  document.querySelectorAll(".cat-panel").forEach(p=>p.classList.toggle("active", p.id==="cat-"+catId));
+  applyMode();
+}
+function applyMode(){
+  const panel = document.getElementById("cat-"+activeCat);
+  panel.querySelector(".learn").classList.toggle("active", activeMode==="learn");
+  panel.querySelector(".game-panel").classList.toggle("active", activeMode==="game");
+  if(activeMode==="game"){
+    const g = games[activeCat];
+    if(!g.started){ g.started = true; startRound(activeCat); }
+  }
+}
+document.querySelectorAll(".subtab").forEach(st=>{
+  st.addEventListener("click", ()=>{
+    activeMode = st.dataset.mode;
+    document.querySelectorAll(".subtab").forEach(x=>x.classList.toggle("active", x===st));
+    applyMode();
+  });
+});
+
+/* ================= START ================= */
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  document.getElementById("overlay").classList.add("hidden");
+  speak("มาเรียนกันเลย");
+});
 </script>
 </body>
 </html>
