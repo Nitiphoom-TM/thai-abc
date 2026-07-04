@@ -490,22 +490,41 @@ const Viewer = (function(){
   let dragging=false, moved=false, lastX=0, lastY=0, downX=0, downY=0;
   const BOX=2.6;
 
+  /* twemoji codepoint (matches CDN filenames) */
+  function toCodePoint(u){
+    const r=[]; let c=0,p=0,i=0;
+    while(i<u.length){ c=u.charCodeAt(i++);
+      if(p){ r.push((0x10000+((p-0xD800)<<10)+(c-0xDC00)).toString(16)); p=0; }
+      else if(0xD800<=c && c<=0xDBFF){ p=c; }
+      else r.push(c.toString(16)); }
+    return r.join("-");
+  }
+  function emojiCP(e){ const raw = e.indexOf("‍")<0 ? e.replace(/️/g,"") : e; return toCodePoint(raw); }
+
   function makeFaceTexture(emoji, col){
     const s=512, c=document.createElement("canvas"); c.width=c.height=s;
     const x=c.getContext("2d");
-    // pastel rounded card
-    const r=90; x.fillStyle=col;
-    x.beginPath();
-    x.moveTo(r,20); x.arcTo(s-20,20,s-20,s-20,r); x.arcTo(s-20,s-20,20,s-20,r);
-    x.arcTo(20,s-20,20,20,r); x.arcTo(20,20,s-20,20,r); x.closePath(); x.fill();
-    // glossy highlight
-    const grd=x.createLinearGradient(0,20,0,s/2); grd.addColorStop(0,"rgba(255,255,255,.55)"); grd.addColorStop(1,"rgba(255,255,255,0)");
-    x.fillStyle=grd; x.fill();
-    // emoji
-    x.font='300px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-    x.textAlign="center"; x.textBaseline="middle";
-    x.fillText(emoji, s/2, s/2+20);
-    const tex=new THREE.CanvasTexture(c); tex.anisotropy=4; return tex;
+    function drawCard(){
+      x.clearRect(0,0,s,s);
+      const r=90; x.fillStyle=col;
+      x.beginPath();
+      x.moveTo(r,20); x.arcTo(s-20,20,s-20,s-20,r); x.arcTo(s-20,s-20,20,s-20,r);
+      x.arcTo(20,s-20,20,20,r); x.arcTo(20,20,s-20,20,r); x.closePath(); x.fill();
+      const grd=x.createLinearGradient(0,20,0,s/2); grd.addColorStop(0,"rgba(255,255,255,.55)"); grd.addColorStop(1,"rgba(255,255,255,0)");
+      x.fillStyle=grd; x.fill();
+    }
+    function drawTextEmoji(){
+      x.font='300px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
+      x.textAlign="center"; x.textBaseline="middle"; x.fillText(emoji, s/2, s/2+20);
+    }
+    drawCard();
+    const tex=new THREE.CanvasTexture(c); tex.anisotropy=4;
+    // load real emoji image (Twemoji) so it shows on every device
+    const img=new Image(); img.crossOrigin="anonymous";
+    img.onload=()=>{ drawCard(); const sz=330, o=(s-sz)/2; try{ x.drawImage(img,o,o+12,sz,sz);}catch(e){ drawTextEmoji(); } tex.needsUpdate=true; };
+    img.onerror=()=>{ drawCard(); drawTextEmoji(); tex.needsUpdate=true; };
+    img.src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+emojiCP(emoji)+".svg";
+    return tex;
   }
 
   function init(){
