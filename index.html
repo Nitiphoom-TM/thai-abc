@@ -166,7 +166,22 @@
     0%{transform:translateY(-10vh) rotate(0); opacity:1;}
     100%{transform:translateY(110vh) rotate(540deg); opacity:0;}
   }
+
+  /* ---- 3D model viewer ---- */
+  .viewer{position:fixed; inset:0; z-index:100; display:none; touch-action:none; overflow:hidden;
+    background:radial-gradient(1000px 800px at 50% 35%, #ffffff 0%, #ffe9c9 55%, #ffd9e6 100%);}
+  .viewer.show{display:block; animation:fade .25s ease;}
+  .viewer canvas{display:block; width:100%; height:100%;}
+  .viewer .vname{position:absolute; left:0; right:0; top:18px; text-align:center; pointer-events:none;
+    font-weight:800; font-size:clamp(1.5rem,7vw,2.4rem); color:#5a3d2b; text-shadow:0 2px 0 #fff, 0 4px 12px rgba(180,120,60,.3);}
+  .viewer .vhint{position:absolute; left:0; right:0; bottom:24px; text-align:center; pointer-events:none;
+    font-weight:800; font-size:clamp(.85rem,4vw,1.1rem); color:#8a6a48; text-shadow:0 2px 0 #fff; opacity:.9;}
+  .viewer .vclose{position:absolute; top:14px; right:16px; z-index:2; width:52px; height:52px; border:none; cursor:pointer;
+    border-radius:50%; font-size:1.6rem; color:#fff; background:linear-gradient(180deg,#ff9bb3,#ff6f91);
+    box-shadow:0 6px 0 #d94f74, var(--shadow-sm); transition:transform .08s, box-shadow .08s;}
+  .viewer .vclose:active{transform:translateY(4px); box-shadow:0 2px 0 #d94f74, var(--shadow-sm);}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
@@ -190,6 +205,12 @@
 
 <main id="main"></main>
 <footer>สร้างเพื่อการเรียนรู้ • เสียงในเครื่อง (Web Speech) • เล่นได้ทุกอุปกรณ์</footer>
+
+<div class="viewer" id="viewer">
+  <button class="vclose" id="vclose" aria-label="ปิด">✕</button>
+  <div class="vname" id="vname"></div>
+  <div class="vhint">👆 ลากเพื่อหมุน 360° • แตะที่ตัวเพื่อฟังเสียง • แตะขอบเพื่อปิด</div>
+</div>
 
 <script>
 /* ================= DATA ================= */
@@ -265,18 +286,40 @@ const CATEGORIES = [
 const CARD_COLORS = ["#ffd166","#ff9bb3","#8ce99a","#7db8ff","#c3a6ff","#ffb27d","#7fe0d9","#ffe08a"]
   .map(c=>c); // cycled
 
-/* ================= SPEECH ================= */
+/* ================= AUDIO / SPEECH ================= */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+/* short punchy sound effect (loud) */
+function sfx(type){
+  ensureAudio(); if(!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const g = audioCtx.createGain();
+  g.connect(audioCtx.destination);
+  const o = audioCtx.createOscillator();
+  o.connect(g);
+  if(type==="pop"){ o.type="triangle"; o.frequency.setValueAtTime(520,t); o.frequency.exponentialRampToValueAtTime(940,t+.12);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.9,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.22); o.start(t); o.stop(t+.24); }
+  else if(type==="boing"){ o.type="sine"; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(660,t+.08); o.frequency.exponentialRampToValueAtTime(180,t+.32);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.9,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.4); o.start(t); o.stop(t+.42); }
+  else { o.type="square"; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(120,t+.2);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.6,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.25); o.start(t); o.stop(t+.27); }
+}
+
 let thaiVoice = null;
 function pickVoice(){
   const voices = speechSynthesis.getVoices();
   thaiVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith("th")) || null;
 }
 if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text){
+function speak(text, withPop){
+  if(withPop) sfx("pop");
   if(!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang="th-TH"; if(thaiVoice) u.voice=thaiVoice; u.rate=0.85; u.pitch=1.05;
+  u.lang="th-TH"; if(thaiVoice) u.voice=thaiVoice; u.rate=0.85; u.pitch=1.1; u.volume=1;  // loudest
   speechSynthesis.speak(u);
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -335,7 +378,7 @@ CATEGORIES.forEach((cat, idx)=>{
     }else{
       b.innerHTML = `<span class="emoji" style="font-size:clamp(2.6rem,12vw,3.6rem)">${item.emoji}</span><span class="label">${item.label}</span>`;
     }
-    b.addEventListener("click", ()=>{ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); speak(item.say); });
+    b.addEventListener("click", ()=>{ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); Viewer.open(item, cat); });
     grid.appendChild(b);
   });
   learn.appendChild(grid);
@@ -438,8 +481,133 @@ document.querySelectorAll(".subtab").forEach(st=>{
   });
 });
 
+/* ================= 3D MODEL VIEWER ================= */
+const Viewer = (function(){
+  const el = document.getElementById("viewer");
+  const nameEl = document.getElementById("vname");
+  let renderer, scene, camera, mesh, raf, ready=false;
+  let baseY=0, t0=0, behavior="spin", cur=null, reactAt=-9, autoSpin=0;
+  let dragging=false, moved=false, lastX=0, lastY=0, downX=0, downY=0;
+  const BOX=2.6;
+
+  function makeFaceTexture(emoji, col){
+    const s=512, c=document.createElement("canvas"); c.width=c.height=s;
+    const x=c.getContext("2d");
+    // pastel rounded card
+    const r=90; x.fillStyle=col;
+    x.beginPath();
+    x.moveTo(r,20); x.arcTo(s-20,20,s-20,s-20,r); x.arcTo(s-20,s-20,20,s-20,r);
+    x.arcTo(20,s-20,20,20,r); x.arcTo(20,20,s-20,20,r); x.closePath(); x.fill();
+    // glossy highlight
+    const grd=x.createLinearGradient(0,20,0,s/2); grd.addColorStop(0,"rgba(255,255,255,.55)"); grd.addColorStop(1,"rgba(255,255,255,0)");
+    x.fillStyle=grd; x.fill();
+    // emoji
+    x.font='300px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    x.textAlign="center"; x.textBaseline="middle";
+    x.fillText(emoji, s/2, s/2+20);
+    const tex=new THREE.CanvasTexture(c); tex.anisotropy=4; return tex;
+  }
+
+  function init(){
+    renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    el.insertBefore(renderer.domElement, el.firstChild);
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(45,1,0.1,100);
+    scene.add(new THREE.AmbientLight(0xffffff,0.9));
+    const d=new THREE.DirectionalLight(0xffffff,0.7); d.position.set(-3,5,6); scene.add(d);
+    // pointer handlers
+    const cv=renderer.domElement;
+    cv.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("resize", ()=>{ if(ready) fit(); });
+    ready=true;
+  }
+
+  function fit(){
+    const w=el.clientWidth, h=el.clientHeight, aspect=w/h;
+    renderer.setSize(w,h); camera.aspect=aspect;
+    const vfov=camera.fov*Math.PI/180;
+    const distH=(BOX*0.56)/Math.tan(vfov/2);
+    const distW=(BOX*0.56)/(Math.tan(vfov/2)*aspect);
+    camera.position.z=Math.max(distH,distW,3.0);
+    camera.updateProjectionMatrix();
+  }
+
+  function ndc(ev){
+    const rect=renderer.domElement.getBoundingClientRect();
+    return {x:((ev.clientX-rect.left)/rect.width)*2-1, y:-((ev.clientY-rect.top)/rect.height)*2+1};
+  }
+  function hitMesh(ev){
+    const p=ndc(ev); const rc=new THREE.Raycaster(); rc.setFromCamera(new THREE.Vector2(p.x,p.y),camera);
+    return rc.intersectObject(mesh).length>0;
+  }
+  function onDown(ev){ if(!el.classList.contains("show"))return; dragging=true; moved=false; lastX=downX=ev.clientX; lastY=downY=ev.clientY; }
+  function onMove(ev){
+    if(!dragging)return;
+    const dx=ev.clientX-lastX, dy=ev.clientY-lastY; lastX=ev.clientX; lastY=ev.clientY;
+    mesh.rotation.y+=dx*0.01; mesh.rotation.x+=dy*0.01;
+    if(Math.hypot(ev.clientX-downX,ev.clientY-downY)>8) moved=true;
+  }
+  function onUp(ev){
+    if(!dragging)return; dragging=false;
+    if(moved)return;                       // was rotating
+    if(hitMesh(ev)){ react(); speak(cur.say,true); }   // tap body -> loud sound
+    else close();                          // tap edge -> disappear
+  }
+  function react(){ reactAt=performance.now()/1000; sfx("boing"); }
+
+  function open(item, cat){
+    ensureAudio();
+    if(!ready) init();
+    cur=item; behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"?"drive":"spin");
+    nameEl.textContent=item.label;
+    const col=CARD_COLORS[(Math.random()*CARD_COLORS.length)|0];
+    const side=new THREE.MeshStandardMaterial({color:col, roughness:.7, metalness:0});
+    const face=new THREE.MeshBasicMaterial({map:makeFaceTexture(item.emoji,col)});
+    if(mesh){ scene.remove(mesh); mesh.geometry.dispose(); }
+    const geo=new THREE.BoxGeometry(BOX,BOX,1.0);
+    mesh=new THREE.Mesh(geo,[side,side,side,side,face,face]); // +x,-x,+y,-y,+z,-z
+    scene.add(mesh);
+    el.classList.add("show");
+    fit(); baseY=0; t0=performance.now()/1000; autoSpin=0;
+    speak(item.say,true);                  // announce loud on open
+    if(!raf) loop();
+  }
+
+  function loop(){
+    raf=requestAnimationFrame(loop);
+    if(!el.classList.contains("show")||!mesh)return;
+    const t=performance.now()/1000 - t0;
+    // idle float
+    let y=Math.sin(t*2)*0.12, x=0, rz=0;
+    if(behavior==="hop"){ y+=Math.abs(Math.sin(t*3))*0.22; rz=Math.sin(t*3)*0.05; }
+    else if(behavior==="drive"){ x=Math.sin(t*1.1)*0.7; mesh.rotation.y += (x>=0?1:-1)*0.0; }
+    else if(behavior==="spin"){ mesh.rotation.x = Math.sin(t)*0.12; }
+    // gentle auto-spin when idle & not dragging
+    if(!dragging) mesh.rotation.y += 0.006;
+    // tap reaction: quick jump + squash + wiggle
+    const rt=performance.now()/1000 - reactAt;
+    let sc=1;
+    if(rt<0.5){ const p=rt/0.5; y+=Math.sin(p*Math.PI)*0.6; sc=1+Math.sin(p*Math.PI)*0.12; rz+=Math.sin(p*Math.PI*3)*0.12; }
+    mesh.position.set(x, baseY+y, 0);
+    mesh.rotation.z = rz;
+    mesh.scale.setScalar(sc);
+    renderer.render(scene,camera);
+  }
+
+  function close(){ el.classList.remove("show"); if("speechSynthesis"in window) speechSynthesis.cancel(); }
+
+  document.getElementById("vclose").addEventListener("click", close);
+  el.addEventListener("keydown", e=>{ if(e.key==="Escape") close(); });
+
+  return { open, close };
+})();
+
 document.getElementById("startBtn").addEventListener("click", ()=>{
   document.getElementById("overlay").classList.add("hidden");
+  ensureAudio();
   speak("มาเรียนกันเลย");
 });
 </script>
