@@ -69,6 +69,34 @@
   .mode-panel.active{display:block;}
   @keyframes fade{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
 
+  /* ---- home menu (grouped) ---- */
+  #home{width:100%; max-width:1120px; margin:0 auto; padding:0 2px 30px; animation:fade .3s ease;}
+  #home.hidden{display:none;}
+  .group-title{font-weight:800; font-size:clamp(1.1rem,4.5vw,1.5rem); color:#5a3d2b; margin:18px 6px 4px; text-shadow:0 2px 0 #fff;}
+  .group-hint{color:var(--muted); font-size:.85rem; margin:0 6px 12px; font-weight:600;}
+  .menu-grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+  .menu-card{
+    --c:#ffd166; --e:#e0ad3f; border:none; cursor:pointer; font-family:inherit; border-radius:22px;
+    padding:18px 12px; color:#3a2e2a; display:flex; align-items:center; gap:12px; text-align:left;
+    background:radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%),
+      linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 80%, #000 3%));
+    box-shadow:0 8px 0 var(--e), 0 14px 20px -8px rgba(90,60,30,.4), inset 0 2px 2px rgba(255,255,255,.7);
+    transition:transform .1s, box-shadow .1s;
+  }
+  .menu-card:active{transform:translateY(6px); box-shadow:0 2px 0 var(--e), 0 8px 12px -6px rgba(90,60,30,.4), inset 0 2px 2px rgba(255,255,255,.7);}
+  .menu-card .mi{font-size:2.2rem; line-height:1; width:2.6rem; text-align:center; flex:none; font-weight:800;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
+  .menu-card .mt{font-weight:800; font-size:clamp(.95rem,3.8vw,1.15rem); line-height:1.15;}
+
+  /* ---- category bar ---- */
+  .catbar{display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .catbar.hidden{display:none;}
+  .backbtn{border:none; cursor:pointer; font-family:inherit; font-weight:800; font-size:clamp(.85rem,3.6vw,1rem);
+    padding:10px 18px; border-radius:14px; color:#7a5a3a; background:linear-gradient(#fff,#ffeccd);
+    box-shadow:0 5px 0 #e7c79a, var(--shadow-sm); transition:transform .08s, box-shadow .08s;}
+  .backbtn:active{transform:translateY(3px); box-shadow:0 2px 0 #e7c79a, var(--shadow-sm);}
+  .subtabs.solo{display:none;}   /* activity categories have no game mode */
+
   /* ---- 3D learn grid ---- */
   .grid{
     display:grid; gap:16px 14px; perspective:1000px;
@@ -208,21 +236,24 @@
 
 <div class="overlay" id="overlay">
   <div class="logo">🎲</div>
-  <h2>เรียนรู้พาสนุก 3D</h2>
-  <p>แตะปุ่มด้านล่างเพื่อเริ่ม แล้วมาเรียน ก-ฮ สัตว์ และยานพาหนะกันเลย!</p>
+  <h2>เรียนรู้พาสนุก</h2>
+  <p>แตะปุ่มด้านล่างเพื่อเริ่ม แล้วมาเรียนตัวอักษร ตัวเลข คำศัพท์ และเล่นเกมกันเลย!</p>
   <button class="start-btn" id="startBtn">▶ เริ่มเล่น</button>
 </div>
 
 <header>
-  <h1>เรียนรู้พาสนุก 🎈</h1>
-  <p class="subtitle">แตะเพื่อฟังเสียง • เล่นเกมทายเสียงสะสมคะแนน</p>
-  <div class="tabs" id="catTabs"></div>
-  <div class="subtabs">
-    <button class="subtab active" data-mode="learn">📖 เรียนรู้</button>
-    <button class="subtab" data-mode="game">🎮 ทายเสียง</button>
+  <h1 id="appTitle">เรียนรู้พาสนุก 🎈</h1>
+  <p class="subtitle" id="appSub">เลือกเมนูที่อยากเรียนได้เลย</p>
+  <div id="catbar" class="catbar hidden">
+    <button id="backBtn" class="backbtn">← เมนู</button>
+    <div class="subtabs" id="subtabs">
+      <button class="subtab active" data-mode="learn">📖 เรียนรู้</button>
+      <button class="subtab" data-mode="game">🎮 ทายเสียง</button>
+    </div>
   </div>
 </header>
 
+<div id="home"></div>
 <main id="main"></main>
 <footer>สร้างเพื่อการเรียนรู้ • เสียงในเครื่อง (Web Speech) • เล่นได้ทุกอุปกรณ์</footer>
 
@@ -294,20 +325,84 @@ const VEHICLES = [
   {n:"เรือข้ามฟาก",e:"⛴️"},{n:"เรือใหญ่",e:"🚢"},
 ];
 
+/* --- Thai vowels --- */
+const VOWELS = ["อะ","อา","อิ","อี","อึ","อือ","อุ","อู","เอะ","เอ","แอะ","แอ","โอะ","โอ","เอาะ","ออ","เออ","เอีย","เอือ","อัว","อำ","ไอ","เอา"];
+
+/* --- English A-Z --- */
+const ALPHA = [
+  {L:"A",w:"Apple",e:"🍎"},{L:"B",w:"Ball",e:"🏀"},{L:"C",w:"Cat",e:"🐱"},{L:"D",w:"Dog",e:"🐶"},
+  {L:"E",w:"Egg",e:"🥚"},{L:"F",w:"Fish",e:"🐟"},{L:"G",w:"Grapes",e:"🍇"},{L:"H",w:"House",e:"🏠"},
+  {L:"I",w:"Ice cream",e:"🍦"},{L:"J",w:"Juice",e:"🧃"},{L:"K",w:"Kite",e:"🪁"},{L:"L",w:"Lion",e:"🦁"},
+  {L:"M",w:"Monkey",e:"🐵"},{L:"N",w:"Nest",e:"🪺"},{L:"O",w:"Orange",e:"🍊"},{L:"P",w:"Pig",e:"🐷"},
+  {L:"Q",w:"Queen",e:"👑"},{L:"R",w:"Rabbit",e:"🐰"},{L:"S",w:"Sun",e:"☀️"},{L:"T",w:"Tiger",e:"🐯"},
+  {L:"U",w:"Umbrella",e:"☂️"},{L:"V",w:"Violin",e:"🎻"},{L:"W",w:"Watch",e:"⌚"},{L:"X",w:"X-ray",e:"🩻"},
+  {L:"Y",w:"Yo-yo",e:"🪀"},{L:"Z",w:"Zebra",e:"🦓"},
+];
+
+/* --- numbers shown with fingers --- */
+const FINGERS = ["✊","☝️","✌️","🤟","🖖","🖐️","🖐️☝️","🖐️✌️","🖐️🤟","🖐️🖖","🙌"];
+const TH_DIGIT = ["๐","๑","๒","๓","๔","๕","๖","๗","๘","๙","๑๐"];
+const TH_WORD  = ["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า","สิบ"];
+const EN_WORD  = ["zero","one","two","three","four","five","six","seven","eight","nine","ten"];
+
+/* --- daily-life vocabulary --- */
+const TRAVEL = [
+  {n:"เครื่องบิน",e:"✈️"},{n:"รถไฟ",e:"🚆"},{n:"เรือ",e:"⛵"},{n:"รถบัส",e:"🚌"},{n:"แท็กซี่",e:"🚕"},
+  {n:"กระเป๋าเดินทาง",e:"🧳"},{n:"แผนที่",e:"🗺️"},{n:"เข็มทิศ",e:"🧭"},{n:"ตั๋ว",e:"🎫"},{n:"หนังสือเดินทาง",e:"📕"},
+  {n:"โรงแรม",e:"🏨"},{n:"ชายหาด",e:"🏖️"},{n:"ภูเขา",e:"⛰️"},{n:"กล้องถ่ายรูป",e:"📷"},
+];
+const BODY = [
+  {n:"ตา",e:"👁️"},{n:"หู",e:"👂"},{n:"จมูก",e:"👃"},{n:"ปาก",e:"👄"},{n:"ลิ้น",e:"👅"},{n:"ฟัน",e:"🦷"},
+  {n:"มือ",e:"✋"},{n:"นิ้วมือ",e:"👆"},{n:"เท้า",e:"🦶"},{n:"ขา",e:"🦵"},{n:"แขน",e:"💪"},
+  {n:"สมอง",e:"🧠"},{n:"หัวใจ",e:"❤️"},{n:"กระดูก",e:"🦴"},
+];
+const TABLE = [
+  {n:"จาน",e:"🍽️"},{n:"ช้อนส้อม",e:"🍴"},{n:"ช้อน",e:"🥄"},{n:"มีด",e:"🔪"},{n:"ตะเกียบ",e:"🥢"},
+  {n:"แก้วน้ำ",e:"🥛"},{n:"ถ้วยกาแฟ",e:"☕"},{n:"ข้าว",e:"🍚"},{n:"ขวดน้ำ",e:"🍶"},{n:"น้ำ",e:"💧"},
+];
+
+/* --- daily routine activities (play group) --- */
+const DAILY = [
+  {n:"กินข้าว",e:"🍚"},{n:"ดื่มนม",e:"🥛"},{n:"อาบน้ำ",e:"🚿"},{n:"แปรงฟัน",e:"🪥"},{n:"ล้างมือ",e:"🧼"},
+  {n:"เข้าห้องน้ำ",e:"🚽"},{n:"แต่งตัว",e:"👕"},{n:"ใส่รองเท้า",e:"👟"},{n:"หวีผม",e:"💇"},
+  {n:"นอนหลับ",e:"😴"},{n:"ตื่นนอน",e:"⏰"},{n:"อ่านหนังสือ",e:"📖"},
+];
+
 const norm = {
   letters: LETTERS.map(L=>({big:L.c, emoji:L.e, label:L.c+" "+L.w, say:L.say, key:L.c})),
+  vowels:  VOWELS.map(f=>({big:f, emoji:"👄", label:"สระ "+f, say:f, key:f})),
+  alpha:   ALPHA.map(a=>({big:a.L, emoji:a.e, label:a.L+" "+a.w, say:a.L+". "+a.w, key:a.L})),
+  thainum: TH_DIGIT.map((d,i)=>({big:d, emoji:FINGERS[i], label:d+" "+TH_WORD[i], say:TH_WORD[i], key:"th"+i, native:true})),
+  engnum:  EN_WORD.map((w,i)=>({big:String(i), emoji:FINGERS[i], label:i+" · "+w, say:w, key:"en"+i, native:true})),
+  travel:  TRAVEL.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
+  body:    BODY.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
+  table:   TABLE.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
   animals: ANIMALS.map(A=>({big:A.e, emoji:A.e, label:A.n, say:A.n, key:A.n})),
-  vehicles: VEHICLES.map(V=>({big:V.e, emoji:V.e, label:V.n, say:V.n, key:V.n})),
+  vehicles:VEHICLES.map(V=>({big:V.e, emoji:V.e, label:V.n, say:V.n, key:V.n})),
+  daily:   DAILY.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
 };
 
 const CATEGORIES = [
-  {id:"letters", label:"ก-ฮ", icon:"📖", type:"letter", prompt:"ฟังเสียงแล้วเลือกตัวอักษรที่ถูก"},
-  {id:"animals", label:"สัตว์", icon:"🐘", type:"pic", prompt:"ฟังชื่อสัตว์แล้วเลือกรูปที่ถูก"},
-  {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก"},
+  // 📚 เรียนรู้
+  {id:"letters", label:"ก-ฮ", icon:"ก", type:"letter", group:"learn", prompt:"ฟังเสียงแล้วเลือกตัวอักษรที่ถูก"},
+  {id:"vowels", label:"สระไทย", icon:"◌า", type:"letter", group:"learn", prompt:"ฟังเสียงสระแล้วเลือกที่ถูก"},
+  {id:"alpha", label:"A-Z", icon:"A", type:"letter", group:"learn", lang:"en", prompt:"Listen and pick the letter"},
+  {id:"thainum", label:"เลขไทย ๑-๑๐", icon:"๕", type:"num", group:"learn", native:true, prompt:"ฟังแล้วเลือกจำนวนที่ถูก"},
+  {id:"engnum", label:"เลข 1-10", icon:"5", type:"num", group:"learn", native:true, lang:"en", prompt:"Listen and pick the number"},
+  {id:"travel", label:"การเดินทาง", icon:"✈️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
+  {id:"body", label:"ร่างกาย", icon:"🧍", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
+  {id:"table", label:"บนโต๊ะอาหาร", icon:"🍽️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
+  {id:"animals", label:"สัตว์", icon:"🐘", type:"pic", group:"learn", prompt:"ฟังชื่อสัตว์แล้วเลือกรูปที่ถูก"},
+  {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก"},
+  // 🎮 เกม & กิจกรรม
+  {id:"daily", label:"กิจวัตรประจำวัน", icon:"🪥", type:"pic", group:"play", activity:true},
+];
+const GROUPS = [
+  {id:"learn", label:"📚 เรียนรู้", hint:"แตะเพื่อฟังเสียง เล่นเกมทายเสียง"},
+  {id:"play", label:"🎮 เกม & กิจกรรม", hint:"แตะตัวการ์ตูนเล่นกับมัน"},
 ];
 
-const CARD_COLORS = ["#ffd166","#ff9bb3","#8ce99a","#7db8ff","#c3a6ff","#ffb27d","#7fe0d9","#ffe08a"]
-  .map(c=>c); // cycled
+const CARD_COLORS = ["#ffd166","#ff9bb3","#8ce99a","#7db8ff","#c3a6ff","#ffb27d","#7fe0d9","#ffe08a"];
 
 /* ================= AUDIO / SPEECH ================= */
 let audioCtx = null;
@@ -331,18 +426,21 @@ function sfx(type){
     g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.6,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.25); o.start(t); o.stop(t+.27); }
 }
 
-let thaiVoice = null;
+let thaiVoice = null, enVoice = null;
 function pickVoice(){
   const voices = speechSynthesis.getVoices();
   thaiVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith("th")) || null;
+  enVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith("en")) || null;
 }
 if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, withPop){
+function speak(text, withPop, lang){
   if(withPop) sfx("pop");
   if(!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang="th-TH"; if(thaiVoice) u.voice=thaiVoice; u.rate=0.85; u.pitch=1.1; u.volume=1;  // loudest
+  if(lang==="en"){ u.lang="en-US"; if(enVoice) u.voice=enVoice; }
+  else { u.lang="th-TH"; if(thaiVoice) u.voice=thaiVoice; }
+  u.rate=0.85; u.pitch=1.1; u.volume=1;  // loudest
   speechSynthesis.speak(u);
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -373,18 +471,29 @@ function getBest(id){ return parseInt(localStorage.getItem(bestKey(id))||"0",10)
 function setBest(id,v){ localStorage.setItem(bestKey(id), String(v)); }
 
 /* ================= BUILD UI ================= */
-const catTabs = document.getElementById("catTabs");
 const mainEl = document.getElementById("main");
+const homeEl = document.getElementById("home");
 
-CATEGORIES.forEach((cat, idx)=>{
-  const tab = document.createElement("button");
-  tab.className = "tab"+(idx===0?" active":"");
-  tab.dataset.cat = cat.id; tab.textContent = cat.icon+" "+cat.label;
-  tab.addEventListener("click", ()=>selectCat(cat.id));
-  catTabs.appendChild(tab);
+/* --- grouped home menu --- */
+GROUPS.forEach(gr=>{
+  const h=document.createElement("div"); h.className="group-title"; h.textContent=gr.label; homeEl.appendChild(h);
+  const hint=document.createElement("div"); hint.className="group-hint"; hint.textContent=gr.hint; homeEl.appendChild(hint);
+  const mg=document.createElement("div"); mg.className="menu-grid";
+  CATEGORIES.filter(c=>c.group===gr.id).forEach((cat,i)=>{
+    const b=document.createElement("button"); b.className="menu-card";
+    const col=CARD_COLORS[i % CARD_COLORS.length];
+    b.style.setProperty("--c",col); b.style.setProperty("--e","color-mix(in srgb, "+col+" 65%, #7a5a2a)");
+    b.innerHTML=`<span class="mi">${cat.icon}</span><span class="mt">${cat.label}</span>`;
+    b.addEventListener("click",()=>selectCat(cat.id));
+    mg.appendChild(b);
+  });
+  homeEl.appendChild(mg);
+});
 
+/* --- category panels (learn grid + game) --- */
+CATEGORIES.forEach(cat=>{
   const panel = document.createElement("section");
-  panel.className = "cat-panel"+(idx===0?" active":""); panel.id = "cat-"+cat.id;
+  panel.className = "cat-panel"; panel.id = "cat-"+cat.id;
 
   // learn grid
   const learn = document.createElement("div");
@@ -396,7 +505,7 @@ CATEGORIES.forEach((cat, idx)=>{
     const col = CARD_COLORS[i % CARD_COLORS.length];
     b.style.setProperty("--c", col);
     b.style.setProperty("--e", "color-mix(in srgb, "+col+" 65%, #7a5a2a)");
-    if(cat.type==="letter"){
+    if(cat.type!=="pic"){
       b.innerHTML = `<span class="emoji">${item.emoji}</span><span class="big">${item.big}</span><span class="label">${item.label}</span>`;
     }else{
       b.innerHTML = `<span class="emoji" style="font-size:clamp(2.6rem,12vw,3.6rem)">${item.emoji}</span><span class="label">${item.label}</span>`;
@@ -416,7 +525,7 @@ CATEGORIES.forEach((cat, idx)=>{
         <div class="badge streak"><span class="lbl">ต่อเนื่อง 🔥</span><span class="v streak-v">0</span></div>
         <div class="badge best"><span class="lbl">สูงสุด 🏆</span><span class="v best-v">0</span></div>
       </div>
-      <p class="prompt">${cat.prompt}</p>
+      <p class="prompt">${cat.prompt||""}</p>
       <button class="play-btn">🔊 ฟังเสียงอีกครั้ง</button>
       <div class="choices"></div>
       <div class="feedback"></div>
@@ -433,7 +542,7 @@ CATEGORIES.forEach((cat, idx)=>{
     bestEl: game.querySelector(".best-v"),
   };
   games[cat.id].bestEl.textContent = getBest(cat.id);
-  game.querySelector(".play-btn").addEventListener("click", ()=>{ if(games[cat.id].current) speak(games[cat.id].current.say); });
+  game.querySelector(".play-btn").addEventListener("click", ()=>{ if(games[cat.id].current) speak(games[cat.id].current.say, false, cat.lang); });
 });
 
 /* ================= GAME LOGIC ================= */
@@ -445,7 +554,7 @@ function startRound(catId){
   g.choicesEl.innerHTML="";
   options.forEach(item=>{
     const b=document.createElement("button"); b.className="choice"; b.dataset.key=item.key;
-    if(g.cat.type==="letter"){
+    if(g.cat.type!=="pic"){
       b.innerHTML = `<span class="big">${item.big}</span><span class="emoji" style="font-size:clamp(1.5rem,6vw,2rem)">${item.emoji}</span>`;
     }else{
       b.innerHTML = `<span class="emoji">${item.emoji}</span>`;
@@ -453,7 +562,7 @@ function startRound(catId){
     b.addEventListener("click", ()=>choose(catId,b,item));
     g.choicesEl.appendChild(b);
   });
-  setTimeout(()=>speak(g.current.say), 350);
+  setTimeout(()=>speak(g.current.say, false, g.cat.lang), 350);
 }
 
 function choose(catId, btn, item){
@@ -484,11 +593,31 @@ function choose(catId, btn, item){
 }
 
 /* ================= NAV ================= */
+const catbarEl = document.getElementById("catbar");
+const appTitle = document.getElementById("appTitle");
+const appSub = document.getElementById("appSub");
+const subtabsEl = document.getElementById("subtabs");
+
 function selectCat(catId){
-  activeCat=catId;
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.cat===catId));
+  const cat = CATEGORIES.find(c=>c.id===catId);
+  activeCat=catId; activeMode="learn";
+  homeEl.classList.add("hidden");
+  catbarEl.classList.remove("hidden");
+  appTitle.textContent = cat.icon+" "+cat.label;
+  appSub.classList.add("hidden");
+  subtabsEl.classList.toggle("solo", !!cat.activity);   // activity = no game mode
+  document.querySelectorAll(".subtab").forEach(x=>x.classList.toggle("active", x.dataset.mode==="learn"));
   document.querySelectorAll(".cat-panel").forEach(p=>p.classList.toggle("active", p.id==="cat-"+catId));
+  window.scrollTo(0,0);
   applyMode();
+}
+function goHome(){
+  homeEl.classList.remove("hidden");
+  catbarEl.classList.add("hidden");
+  appTitle.textContent="เรียนรู้พาสนุก 🎈";
+  appSub.classList.remove("hidden");
+  document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
+  window.scrollTo(0,0);
 }
 function applyMode(){
   const panel=document.getElementById("cat-"+activeCat);
@@ -496,6 +625,7 @@ function applyMode(){
   panel.querySelector(".game-panel").classList.toggle("active", activeMode==="game");
   if(activeMode==="game"){ const g=games[activeCat]; if(!g.started){ g.started=true; startRound(activeCat); } }
 }
+document.getElementById("backBtn").addEventListener("click", goHome);
 document.querySelectorAll(".subtab").forEach(st=>{
   st.addEventListener("click", ()=>{
     activeMode=st.dataset.mode;
@@ -511,7 +641,7 @@ const Viewer = (function(){
   const stage=document.getElementById("stage");
   const hero=document.getElementById("hero");
   const art=document.getElementById("art");
-  let cur=null, behavior="bob", raf=null, t0=0;
+  let cur=null, curLang=null, behavior="bob", raf=null, t0=0;
   let x=0,y=0,vx=0,vy=0, facing=1;
   const ANIMS=["jump","spin","wobble","pop"];
   const PARTS=["⭐","💖","✨","🌟","🎉","💫"];
@@ -526,8 +656,10 @@ const Viewer = (function(){
   }
   function emojiCP(e){ const raw = e.indexOf("‍")<0 ? e.replace(/️/g,"") : e; return toCodePoint(raw); }
 
-  function setArt(emoji){
-    art.classList.remove("imgfont"); art.textContent="";
+  function setArt(emoji, native){
+    art.textContent="";
+    if(native){ art.classList.add("imgfont"); art.textContent=emoji; return; }  // fingers/text as-is
+    art.classList.remove("imgfont");
     const img=new Image();
     img.style.width="100%"; img.style.height="100%"; img.alt="";
     img.onerror=()=>{ art.classList.add("imgfont"); art.textContent=emoji; };
@@ -564,7 +696,7 @@ const Viewer = (function(){
     const a=ANIMS[(Math.random()*ANIMS.length)|0];
     art.classList.remove(...ANIMS); void art.offsetWidth; art.classList.add(a);
     particles();
-    sfx("boing"); speak(cur.say, true);      // loud
+    sfx("boing"); speak(cur.say, true, curLang);      // loud
     if(Math.random()<0.55) launch(1.7);       // sometimes dart away like it's playing
   }
   art.parentNode.addEventListener("pointerdown", heroTap);
@@ -588,16 +720,16 @@ const Viewer = (function(){
 
   function open(item, cat){
     ensureAudio();
-    cur=item;
-    behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"?"drive":"bob");
+    cur=item; curLang=cat.lang||null;
+    behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"?"drive":(cat.id==="daily"?"hop":"bob"));
     nameEl.textContent=item.label;
-    setArt(item.emoji);
+    setArt(item.emoji, item.native||cat.native);
     el.classList.add("show");
     const W=stage.clientWidth, H=stage.clientHeight, size=artPx();
     x=(W-size)/2; y=(H-size)/2; launch(1);
     t0=performance.now()/1000;
     art.classList.remove(...ANIMS); void art.offsetWidth; art.classList.add("pop");
-    speak(item.say, true);
+    speak(item.say, true, curLang);
     if(!raf) loop();
   }
 
