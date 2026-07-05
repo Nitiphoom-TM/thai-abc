@@ -193,6 +193,13 @@
   .card .emoji{font-size:clamp(1.9rem,8.5vw,2.7rem); line-height:1; filter:drop-shadow(0 3px 2px rgba(0,0,0,.18));}
   .card .label{font-size:clamp(.72rem,3.2vw,.92rem); font-weight:700; text-align:center; color:#4a3a2e;}
 
+  /* ---- real photo media ---- */
+  .pic-img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:14px; display:block;
+    background:#fff; box-shadow:0 3px 6px rgba(90,60,30,.22); border:2px solid rgba(255,255,255,.8);}
+  .card .pic-img{max-width:92px; margin:0 auto 2px;}
+  .choice .pic-img{max-width:96px; margin:0 auto;}
+  .ing .pic-img{max-width:50px; border-radius:11px;}
+
   /* ---- 3D game ---- */
   .game{
     background:linear-gradient(180deg,#ffffff,#fff4e2);
@@ -863,6 +870,23 @@ function emojiImgURL(e){
   return "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+toCodePointGlobal(raw)+".svg";
 }
 
+/* ---- real photos (self-hosted), with emoji fallback ---- */
+const PHOTO_CATS = new Set(["animals","vehicles","carjobs","instruments","nature","travel","table","body","daily","letters","alpha","cook"]);
+function hasPhoto(catId){ return PHOTO_CATS.has(catId); }
+function photoSrc(catId, key){ return "images/"+catId+"/"+encodeURIComponent(key)+".jpg"; }
+/* returns HTML: an <img> when a photo exists for this category, else an emoji <span>.
+   call attachFallback(rootEl) after inserting so a missing photo swaps to the emoji. */
+function mediaHTML(catId, key, emoji, spanCls){
+  spanCls = spanCls || "emoji";
+  if(hasPhoto(catId)) return `<img class="pic-img" loading="lazy" alt="" src="${photoSrc(catId,key)}" data-e="${emoji}" data-cls="${spanCls}">`;
+  return `<span class="${spanCls}">${emoji}</span>`;
+}
+function attachFallback(root){
+  root.querySelectorAll("img.pic-img").forEach(img=>{
+    img.onerror=()=>{ const s=document.createElement("span"); s.className=img.dataset.cls||"emoji"; s.textContent=img.dataset.e||""; img.replaceWith(s); };
+  });
+}
+
 /* ================= CONFETTI ================= */
 function celebrate(big){
   const emojis = big ? ["🌟","🎉","⭐","✨","🏆","🎊"] : ["⭐","✨","🎉","🌟"];
@@ -953,10 +977,12 @@ CATEGORIES.forEach(cat=>{
     b.style.setProperty("--c", col);
     b.style.setProperty("--e", "color-mix(in srgb, "+col+" 65%, #7a5a2a)");
     if(cat.type!=="pic"){
-      b.innerHTML = `<span class="emoji">${item.emoji}</span><span class="big">${item.big}</span><span class="label">${item.label}</span>`;
+      b.innerHTML = mediaHTML(cat.id,item.key,item.emoji)+`<span class="big">${item.big}</span><span class="label">${item.label}</span>`;
     }else{
-      b.innerHTML = `<span class="emoji" style="font-size:clamp(2.6rem,12vw,3.6rem)">${item.emoji}</span><span class="label">${item.label}</span>`;
+      b.innerHTML = mediaHTML(cat.id,item.key,item.emoji,"emoji")+`<span class="label">${item.label}</span>`;
+      if(!hasPhoto(cat.id)) b.querySelector(".emoji").style.fontSize="clamp(2.6rem,12vw,3.6rem)";
     }
+    attachFallback(b);
     b.addEventListener("click", ()=>{
       b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
       if(Settings.animOn){ Viewer.open(item, cat); return; }
@@ -1010,10 +1036,12 @@ function startRound(catId){
   options.forEach(item=>{
     const b=document.createElement("button"); b.className="choice"; b.dataset.key=item.key;
     if(g.cat.type!=="pic"){
-      b.innerHTML = `<span class="big">${item.big}</span><span class="emoji" style="font-size:clamp(1.5rem,6vw,2rem)">${item.emoji}</span>`;
+      b.innerHTML = `<span class="big">${item.big}</span>`+mediaHTML(g.cat.id,item.key,item.emoji);
+      if(!hasPhoto(g.cat.id)) b.querySelector(".emoji").style.fontSize="clamp(1.5rem,6vw,2rem)";
     }else{
-      b.innerHTML = `<span class="emoji">${item.emoji}</span>`;
+      b.innerHTML = mediaHTML(g.cat.id,item.key,item.emoji);
     }
+    attachFallback(b);
     b.addEventListener("click", ()=>choose(catId,b,item));
     g.choicesEl.appendChild(b);
   });
@@ -1123,14 +1151,17 @@ const Viewer = (function(){
   }
   function emojiCP(e){ const raw = e.indexOf("‍")<0 ? e.replace(/️/g,"") : e; return toCodePoint(raw); }
 
-  function setArt(emoji, native){
+  function setArt(emoji, native, catId, key){
     art.textContent="";
     if(native){ art.classList.add("imgfont"); art.textContent=emoji; return; }  // fingers/text as-is
     art.classList.remove("imgfont");
     const img=new Image();
-    img.style.width="100%"; img.style.height="100%"; img.alt="";
-    img.onerror=()=>{ art.classList.add("imgfont"); art.textContent=emoji; };
-    img.src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+emojiCP(emoji)+".svg";
+    img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain"; img.alt="";
+    const twemoji="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+emojiCP(emoji)+".svg";
+    const usePhoto = catId && hasPhoto(catId);
+    img.onerror=()=>{ if(img.src.indexOf("twemoji")<0 && usePhoto){ img.style.objectFit="cover"; img.src=twemoji; } else { art.classList.add("imgfont"); art.textContent=emoji; } };
+    if(usePhoto){ img.style.objectFit="cover"; img.style.borderRadius="18px"; img.src=photoSrc(catId,key); }
+    else { img.src=twemoji; }
     art.appendChild(img);
   }
   function artPx(){ return 0.44*Math.min(stage.clientWidth, stage.clientHeight); }
@@ -1192,7 +1223,7 @@ const Viewer = (function(){
     cur=item; curLang=cat.lang||null; curCatId=cat.id;
     behavior = cat.id==="animals"?"hop":(cat.id==="vehicles"||cat.id==="carjobs"?"drive":(cat.id==="daily"?"hop":"bob"));
     nameEl.textContent=item.label;
-    setArt(item.emoji, item.native||cat.native);
+    setArt(item.emoji, item.native||cat.native, cat.id, item.key);
     el.classList.add("show");
     const W=stage.clientWidth, H=stage.clientHeight, size=artPx();
     x=(W-size)/2; y=(H-size)/2; launch(1);
@@ -1245,7 +1276,8 @@ const Cooking = (function(){
     ingsEl=el.querySelector("#ings"); methodsEl=el.querySelector("#methods");
     COOK_INGS.forEach(ing=>{
       const b=document.createElement("button"); b.className="ing";
-      b.innerHTML=`<span class="ie">${ing.e}</span><span class="il">${ing.n}</span>`;
+      b.innerHTML=mediaHTML("cook",ing.n,ing.e,"ie")+`<span class="il">${ing.n}</span>`;
+      attachFallback(b);
       b.addEventListener("click",()=>addIng(ing)); ingsEl.appendChild(b);
     });
     COOK_METHODS.forEach(mth=>{
