@@ -3,8 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#fef6e4">
-<title>เรียนรู้พาสนุก 🎈 3D • ก-ฮ • สัตว์ • ยานพาหนะ</title>
+<meta name="theme-color" content="#ff8fab">
+<title>เรียนรู้พาสนุก น้องจัสติน 🎈</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เรียนรู้พาสนุก">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
   :root{
     --bg1:#fff7ec; --bg2:#ffe7c7; --bg3:#ffd9e6;
@@ -290,21 +298,56 @@
   /* particle burst */
   .pcl{position:absolute; z-index:5; pointer-events:none; font-size:5vmin; will-change:transform,opacity;}
   @keyframes burst{0%{transform:translate(-50%,-50%) scale(.4); opacity:1;}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.3); opacity:0;}}
+
+  /* ---- clapping hands celebration ---- */
+  .clap{position:fixed; z-index:90; pointer-events:none; font-size:3rem; will-change:transform,opacity;}
+  @keyframes clapAnim{
+    0%{transform:translateY(0) rotate(0) scale(.6); opacity:0;}
+    15%{opacity:1; transform:translateY(-8px) rotate(-12deg) scale(1.1);}
+    30%{transform:translateY(0) rotate(12deg) scale(1);}
+    45%{transform:translateY(-8px) rotate(-12deg) scale(1.1);}
+    60%{transform:translateY(0) rotate(12deg) scale(1);}
+    100%{opacity:0; transform:translateY(30px) rotate(0) scale(.8);}
+  }
+
+  /* ---- header gear/settings ---- */
+  header{position:relative;}
+  .gearbtn{position:absolute; top:0; right:4px; border:none; cursor:pointer; font-size:1.5rem;
+    background:linear-gradient(180deg,#fff,#ffeccd); border-radius:50%; width:46px; height:46px;
+    box-shadow:0 5px 0 #e7c79a, var(--shadow-sm); transition:transform .08s;}
+  .gearbtn:active{transform:translateY(3px) rotate(20deg);}
+  .settings-overlay{position:fixed; inset:0; z-index:120; display:flex; align-items:center; justify-content:center;
+    background:rgba(60,40,20,.45); padding:20px;}
+  .settings-overlay.hidden{display:none;}
+  .settings-card{background:linear-gradient(180deg,#fff,#fff6e6); border-radius:26px; padding:24px 22px; max-width:380px; width:100%;
+    box-shadow:var(--shadow-lg);}
+  .settings-card h3{margin:0 0 16px; color:#5a3d2b; font-size:1.3rem;}
+  .setting-row{display:flex; align-items:center; gap:14px; margin-bottom:20px;}
+  .setting-txt{flex:1;}
+  .setting-title{font-weight:800; color:#3a2e2a; margin-bottom:3px;}
+  .setting-hint{font-size:.78rem; color:var(--muted); line-height:1.4;}
+  .toggle{flex:none; width:60px; height:34px; border-radius:20px; border:none; cursor:pointer;
+    background:#d8cfc2; position:relative; transition:background .2s; padding:0;}
+  .toggle[aria-checked="true"]{background:linear-gradient(90deg,#8ce99a,#54c96a);}
+  .toggle .knob{position:absolute; top:3px; left:3px; width:28px; height:28px; border-radius:50%; background:#fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.25); transition:transform .2s;}
+  .toggle[aria-checked="true"] .knob{transform:translateX(26px);}
 </style>
 </head>
 <body>
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 
 <div class="overlay" id="overlay">
-  <div class="logo">🎲</div>
-  <h2>เรียนรู้พาสนุก</h2>
+  <div class="logo">🎈</div>
+  <h2>ยินดีต้อนรับน้องจัสติน! 🎉</h2>
   <p>แตะปุ่มด้านล่างเพื่อเริ่ม แล้วมาเรียนตัวอักษร ตัวเลข คำศัพท์ และเล่นเกมกันเลย!</p>
   <button class="start-btn" id="startBtn">▶ เริ่มเล่น</button>
 </div>
 
 <header>
+  <button class="gearbtn" id="gearBtn" aria-label="ตั้งค่า">⚙️</button>
   <h1 id="appTitle">เรียนรู้พาสนุก 🎈</h1>
-  <p class="subtitle" id="appSub">เลือกเมนูที่อยากเรียนได้เลย</p>
+  <p class="subtitle" id="appSub">สวัสดีน้องจัสติน! 👋 เลือกเมนูที่อยากเรียนได้เลย</p>
   <div id="catbar" class="catbar hidden">
     <button id="backBtn" class="backbtn">← เมนู</button>
     <div class="subtabs" id="subtabs">
@@ -313,6 +356,20 @@
     </div>
   </div>
 </header>
+
+<div class="settings-overlay hidden" id="settingsOverlay">
+  <div class="settings-card">
+    <h3>⚙️ ตั้งค่า</h3>
+    <div class="setting-row">
+      <div class="setting-txt">
+        <div class="setting-title">🎬 แอนิเมชันเต็มจอ</div>
+        <div class="setting-hint">เปิด = แตะแล้วตัวการ์ตูนลอยเต็มจอ<br>ปิด = แตะแล้วส่งเสียงทันที (ค่าเริ่มต้น)</div>
+      </div>
+      <button class="toggle" id="animToggle" role="switch" aria-checked="false"><span class="knob"></span></button>
+    </div>
+    <button class="cbtn eat" id="settingsCloseBtn">เสร็จแล้ว ✓</button>
+  </div>
+</div>
 
 <div id="home"></div>
 <main id="main"></main>
@@ -330,6 +387,15 @@
 </div>
 
 <script>
+/* ================= CHILD / SETTINGS ================= */
+const CHILD_NAME = "น้องจัสติน";
+const Settings = {
+  animOn: localStorage.getItem("settings_animOn") === "true",  // default OFF
+  setAnim(v){ this.animOn=v; localStorage.setItem("settings_animOn", String(v)); }
+};
+function totalWins(){ return parseInt(localStorage.getItem("total_wins")||"0",10); }
+function bumpWins(){ const n=totalWins()+1; localStorage.setItem("total_wins", String(n)); return n; }
+
 /* ================= DATA ================= */
 const LETTERS = [
   {c:"ก",w:"ไก่",e:"🐔",say:"กอ ไก่"},{c:"ข",w:"ไข่",e:"🥚",say:"ขอ ไข่"},
@@ -692,6 +758,34 @@ function celebrate(big){
   }
 }
 
+/* ---- clapping hands (played alongside every win) ---- */
+function clapHands(big){
+  const n = big?7:4;
+  for(let i=0;i<n;i++){
+    const s=document.createElement("div"); s.className="clap"; s.textContent="👏";
+    s.style.left=(20+Math.random()*60)+"vw"; s.style.top=(30+Math.random()*40)+"vh";
+    s.style.animationDelay=(i*0.08)+"s";
+    s.style.animation="clapAnim 1s ease-in-out forwards";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 1200+i*80);
+  }
+  ensureAudio(); sfx("pop"); setTimeout(()=>sfx("pop"),90); setTimeout(()=>sfx("pop"),180);
+}
+
+/* ---- escalating praise for น้องจัสติน, tone gets more excited the more wins ---- */
+const PRAISE_TIERS = [
+  [CHILD_NAME+" เก่งมาก! 🎉", "ถูกต้องนะจ๊ะ "+CHILD_NAME+" 👍", "เยี่ยมไปเลย "+CHILD_NAME+"!"],
+  [CHILD_NAME+" สุดยอดไปเลย! 🌟", CHILD_NAME+" เก่งขึ้นเรื่อยๆ เลยนะ ✨", "ทำได้ดีมาก "+CHILD_NAME+" 💫"],
+  ["ว้าว "+CHILD_NAME+" เก่งมากๆ! 🏆", CHILD_NAME+" ทำได้ดีมากจริงๆ 💪", "สุดยอด "+CHILD_NAME+" ไม่มีใครเก่งเท่าแล้ว!"],
+  [CHILD_NAME+" สุดยอดแชมป์เปี้ยน! 👑🎊", "ไม่มีใครเก่งเท่า"+CHILD_NAME+"แล้ว! 🥇", CHILD_NAME+" คือสุดยอดตัวจริง! 🌈🏆"],
+];
+function praiseMessage(){
+  const wins = bumpWins();
+  const tier = Math.min(Math.floor(wins/3), PRAISE_TIERS.length-1);
+  const arr = PRAISE_TIERS[tier];
+  return arr[(Math.random()*arr.length)|0];
+}
+
 /* ================= STATE ================= */
 const games = {};
 let activeCat = CATEGORIES[0].id;
@@ -741,7 +835,15 @@ CATEGORIES.forEach(cat=>{
     }else{
       b.innerHTML = `<span class="emoji" style="font-size:clamp(2.6rem,12vw,3.6rem)">${item.emoji}</span><span class="label">${item.label}</span>`;
     }
-    b.addEventListener("click", ()=>{ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); Viewer.open(item, cat); });
+    b.addEventListener("click", ()=>{
+      b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+      if(Settings.animOn){ Viewer.open(item, cat); return; }
+      // animations off (default): just make the sound right on the card, no fullscreen viewer
+      ensureAudio();
+      const kind = soundKindFor(cat.id, item);
+      if(kind){ playCritter(kind); setTimeout(()=>speak(item.say, false, cat.lang), 260); }
+      else { speak(item.say, true, cat.lang); }
+    });
     grid.appendChild(b);
   });
   learn.appendChild(grid);
@@ -809,14 +911,16 @@ function choose(catId, btn, item){
     let newBest=false;
     if(g.score > prevBest){ setBest(catId, g.score); g.bestEl.textContent=g.score; newBest=true; }
     playCritter(soundKindFor(catId, g.current));
+    const praise = praiseMessage();
+    clapHands(newBest);
     if(newBest && g.score>0 && prevBest>0){
-      g.feedbackEl.textContent="ทำลายสถิติ! 🏆 +"+gain;
-      celebrate(true); setTimeout(()=>speak("เยี่ยมมาก ทำลายสถิติ"),350);
+      g.feedbackEl.textContent="ทำลายสถิติ! 🏆 +"+gain+" — "+praise;
+      celebrate(true); setTimeout(()=>speak("เยี่ยมมาก ทำลายสถิติ "+praise),350);
     }else{
-      g.feedbackEl.textContent="เก่งมาก! 🎉 "+g.current.label+"  +"+gain;
-      celebrate(false); setTimeout(()=>speak("ถูกต้อง เก่งมาก"),350);
+      g.feedbackEl.textContent="🎉 "+g.current.label+"  +"+gain+" — "+praise;
+      celebrate(false); setTimeout(()=>speak(praise),350);
     }
-    setTimeout(()=>startRound(catId), 1600);
+    setTimeout(()=>startRound(catId), 1800);
   }else{
     btn.classList.add("wrong"); btn.disabled=true; g.streak=0;
     g.feedbackEl.textContent="ลองอีกครั้งนะ 💪"; speak("ลอง อีก ครั้ง");
@@ -1066,10 +1170,10 @@ const Cooking = (function(){
     resultEl.querySelector("#eatBtn").addEventListener("click",eat);
     resultEl.querySelector("#sellBtn").addEventListener("click",sell);
   }
-  function eat(){ sfx("boing"); speak("อร่อยจัง อิ่มแล้ว", true); celebrate(true); clearAll(); }
+  function eat(){ sfx("boing"); clapHands(false); speak("อร่อยจัง อิ่มแล้ว "+praiseMessage(), true); celebrate(true); clearAll(); }
   function sell(){
     coins+=result.price; localStorage.setItem("cook_coins",String(coins)); coinEl.textContent=coins;
-    sfx("coin"); speak("ขายได้ "+result.price+" เหรียญ", true); celebrate(true); clearAll();
+    sfx("coin"); clapHands(false); speak("ขายได้ "+result.price+" เหรียญ "+praiseMessage(), true); celebrate(true); clearAll();
   }
   function clearAll(){
     pot=[]; method=null; result=null; renderPot(); if(methodPickEl) methodPickEl.textContent=""; if(resultEl) resultEl.innerHTML="";
@@ -1129,7 +1233,7 @@ const CarShop = (function(){
     }));
     el.querySelector("#randBtn").addEventListener("click",randomize);
     el.querySelector("#resetBtn").addEventListener("click",reset);
-    el.querySelector("#doneBtn").addEventListener("click",()=>{ sfx("boing"); speak("รถสวยมากเลย เก่งจัง",true); celebrate(true); });
+    el.querySelector("#doneBtn").addEventListener("click",()=>{ sfx("boing"); clapHands(false); speak("รถสวยมากเลย "+praiseMessage(),true); celebrate(true); });
     built=true;
   }
   function updateSel(){
@@ -1157,7 +1261,18 @@ const CarShop = (function(){
 document.getElementById("startBtn").addEventListener("click", ()=>{
   document.getElementById("overlay").classList.add("hidden");
   ensureAudio();
-  speak("มาเรียนกันเลย");
+  speak("มาเรียนกันเลย "+CHILD_NAME);
+});
+
+/* ================= SETTINGS PANEL ================= */
+const settingsOverlay = document.getElementById("settingsOverlay");
+const animToggle = document.getElementById("animToggle");
+function syncAnimToggle(){ animToggle.setAttribute("aria-checked", String(Settings.animOn)); }
+syncAnimToggle();
+document.getElementById("gearBtn").addEventListener("click", ()=>{ ensureAudio(); sfx("pop"); settingsOverlay.classList.remove("hidden"); });
+document.getElementById("settingsCloseBtn").addEventListener("click", ()=>{ sfx("pop"); settingsOverlay.classList.add("hidden"); });
+animToggle.addEventListener("click", ()=>{
+  Settings.setAnim(!Settings.animOn); syncAnimToggle(); sfx("pop");
 });
 </script>
 </body>
