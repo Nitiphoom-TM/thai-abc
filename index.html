@@ -371,6 +371,30 @@
   .sc-canvas-wrap{position:relative; border-radius:26px; overflow:hidden; box-shadow:var(--shadow-lg); touch-action:none;}
   .sc-canvas-wrap canvas{display:block; width:100%; height:auto;}
   .sc-hint{text-align:center; color:var(--muted); font-weight:700; margin-top:10px;}
+
+  /* ---- sorting (garbage / toy pickup) ---- */
+  .sorting{width:100%; max-width:640px; margin:0 auto; padding:0 4px 30px; animation:fade .3s ease;}
+  .sorting.hidden{display:none;}
+  .sort-modes{display:flex; gap:10px; justify-content:center; margin-bottom:14px;}
+  .sort-mode{border:none; cursor:pointer; font-family:inherit; font-weight:800; font-size:clamp(.85rem,3.6vw,1rem);
+    padding:10px 18px; border-radius:14px; color:#7a5a3a; background:linear-gradient(#fff,#ffeccd);
+    box-shadow:0 5px 0 #e7c79a, var(--shadow-sm);}
+  .sort-mode.active{color:#fff; background:linear-gradient(#7db8ff,#4a97dd); box-shadow:0 5px 0 #3877b3, var(--shadow-sm);}
+  .sort-bins{display:flex; gap:10px; justify-content:center; margin-bottom:18px; flex-wrap:wrap;}
+  .sort-bin{flex:1; min-width:96px; max-width:170px; border-radius:20px; padding:14px 8px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:2px; font-weight:800; color:#3a2e2a;
+    box-shadow:0 8px 0 rgba(0,0,0,.12), var(--shadow-sm); transition:transform .1s;}
+  .sort-bin .be{font-size:clamp(2rem,10vw,2.8rem); line-height:1;}
+  .sort-bin .bn{font-size:.8rem;}
+  .sort-bin.hl{transform:scale(1.06); outline:4px dashed rgba(58,91,217,.7); outline-offset:2px;}
+  .sort-tray{display:flex; flex-wrap:wrap; gap:12px; justify-content:center;}
+  .sort-item{width:76px; height:76px; border-radius:18px; background:linear-gradient(180deg,#fff,#fff2df);
+    box-shadow:0 6px 0 #e7c79a, var(--shadow-sm); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    cursor:grab; touch-action:none; position:relative; z-index:1;}
+  .sort-item.dragging{z-index:40; box-shadow:0 10px 18px rgba(0,0,0,.3);}
+  .sort-item .se{font-size:2rem; line-height:1;}
+  .sort-item .sl{font-size:.56rem; color:var(--muted); font-weight:700; text-align:center; padding:0 2px;}
+  .sort-item.placed{visibility:hidden;}
 </style>
 </head>
 <body>
@@ -416,6 +440,7 @@
 <div id="carshop" class="carshop hidden"></div>
 <div id="shadowgame" class="shadowgame hidden"></div>
 <div id="scratchgame" class="scratchgame hidden"></div>
+<div id="sortgame" class="sorting hidden"></div>
 <footer>สร้างเพื่อการเรียนรู้ • เสียงในเครื่อง (Web Speech) • เล่นได้ทุกอุปกรณ์</footer>
 
 <div class="viewer" id="viewer">
@@ -696,6 +721,7 @@ const CATEGORIES = [
   {id:"cooking", label:"เกมทำอาหาร", icon:"🍳", group:"play", cooking:true},
   {id:"shadow", label:"จับคู่เงา", icon:"🌑", group:"play", shadow:true},
   {id:"scratch", label:"ขูดภาพระบายสี", icon:"🖍️", group:"play", scratch:true},
+  {id:"sorting", label:"แยกขยะ-เก็บของ", icon:"🗑️", group:"play", sorting:true},
 ];
 
 /* --- cooking game data (free-play, Thai + international) --- */
@@ -1093,11 +1119,12 @@ function selectCat(catId){
   appSub.classList.add("hidden");
   document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
   window.scrollTo(0,0);
-  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close();
+  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close(); SortingGame.close();
   if(cat.cooking){ subtabsEl.style.display="none"; Cooking.open(); return; }   // cooking screen
   if(cat.carshop){ subtabsEl.style.display="none"; CarShop.open(); return; }   // car customize screen
   if(cat.shadow){ subtabsEl.style.display="none"; ShadowGame.open(); return; }   // shadow-matching screen
   if(cat.scratch){ subtabsEl.style.display="none"; ScratchGame.open(); return; } // scratch & reveal screen
+  if(cat.sorting){ subtabsEl.style.display="none"; SortingGame.open(); return; } // sorting screen
   subtabsEl.style.display="";
   subtabsEl.classList.toggle("solo", !!cat.activity);   // activity = no game mode
   document.querySelectorAll(".subtab").forEach(x=>x.classList.toggle("active", x.dataset.mode==="learn"));
@@ -1111,7 +1138,7 @@ function goHome(){
   appSub.classList.remove("hidden");
   subtabsEl.style.display="";
   document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
-  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close();
+  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close(); SortingGame.close();
   window.scrollTo(0,0);
 }
 function applyMode(){
@@ -1579,6 +1606,114 @@ const ScratchGame = (function(){
   }
 
   function open(){ ensureAudio(); if(!built) build(); loadScene(SCENES[0]); el.classList.remove("hidden"); }
+  function close(){ el.classList.add("hidden"); }
+  return { open, close };
+})();
+
+/* ================= SORTING (garbage / toy pickup) ================= */
+const SortingGame = (function(){
+  const el=document.getElementById("sortgame");
+  const GARBAGE=[
+    {e:"🍾",n:"ขวดแก้ว",bin:"recycle"},{e:"🥫",n:"กระป๋อง",bin:"recycle"},{e:"📄",n:"กระดาษ",bin:"recycle"},
+    {e:"📦",n:"กล่องกระดาษ",bin:"recycle"},{e:"🧴",n:"ขวดพลาสติก",bin:"recycle"},{e:"📰",n:"หนังสือพิมพ์",bin:"recycle"},
+    {e:"🍎",n:"เศษผลไม้",bin:"food"},{e:"🍌",n:"เปลือกกล้วย",bin:"food"},{e:"🍚",n:"เศษข้าว",bin:"food"},
+    {e:"🥬",n:"เศษผัก",bin:"food"},{e:"🍗",n:"เศษอาหาร",bin:"food"},{e:"🍉",n:"เปลือกผลไม้",bin:"food"},
+    {e:"🩹",n:"พลาสเตอร์",bin:"general"},{e:"🧻",n:"ทิชชู่ใช้แล้ว",bin:"general"},{e:"🧦",n:"ถุงเท้าขาด",bin:"general"},
+    {e:"✏️",n:"ดินสอหัก",bin:"general"},
+  ];
+  const GBINS=[
+    {id:"recycle",e:"♻️",n:"รีไซเคิล",color:"#ffd166"},
+    {id:"food",e:"🍂",n:"เศษอาหาร",color:"#8ce99a"},
+    {id:"general",e:"🗑️",n:"ทั่วไป",color:"#ced4da"},
+  ];
+  const TOYS=[
+    {e:"🧸",n:"ตุ๊กตาหมี",bin:"box"},{e:"🚗",n:"รถของเล่น",bin:"box"},{e:"⚽",n:"ลูกบอล",bin:"box"},
+    {e:"🪀",n:"โยโย่",bin:"box"},{e:"🧩",n:"จิ๊กซอว์",bin:"box"},{e:"🎈",n:"ลูกโป่ง",bin:"box"},
+    {e:"🪁",n:"ว่าว",bin:"box"},{e:"🧱",n:"ตัวต่อ",bin:"box"},{e:"🎲",n:"ลูกเต๋า",bin:"box"},{e:"🪆",n:"ตุ๊กตา",bin:"box"},
+  ];
+  const TBINS=[{id:"box",e:"📦",n:"กล่องของเล่น",color:"#ffb27d"}];
+  let built=false, mode="garbage", binsEl, trayEl, hintEl, scoreEl, rounds=0, remaining=0;
+
+  function build(){
+    el.innerHTML=`
+      <div class="sort-modes">
+        <button class="sort-mode active" data-m="garbage">🗑️ แยกขยะ</button>
+        <button class="sort-mode" data-m="toys">🧸 เก็บของเล่น</button>
+      </div>
+      <div class="sg-score">✅ ทำสำเร็จ: <span id="sortScore">0</span> รอบ</div>
+      <p class="sg-hint" id="sortHint"></p>
+      <div class="sort-bins" id="sortBins"></div>
+      <div class="sort-tray" id="sortTray"></div>`;
+    binsEl=el.querySelector("#sortBins"); trayEl=el.querySelector("#sortTray");
+    hintEl=el.querySelector("#sortHint"); scoreEl=el.querySelector("#sortScore");
+    el.querySelectorAll(".sort-mode").forEach(b=>b.addEventListener("click",()=>{
+      mode=b.dataset.m; el.querySelectorAll(".sort-mode").forEach(x=>x.classList.toggle("active",x===b));
+      sfx("pop"); newRound();
+    }));
+    built=true;
+  }
+
+  function newRound(){
+    const bins = mode==="garbage" ? GBINS : TBINS;
+    const src  = mode==="garbage" ? GARBAGE : TOYS;
+    hintEl.textContent = mode==="garbage" ? "👆 ลากขยะไปทิ้งถังให้ถูกประเภท" : "👆 ลากของเล่นเก็บลงกล่องให้หมด";
+    binsEl.innerHTML=""; trayEl.innerHTML="";
+    bins.forEach(bn=>{
+      const d=document.createElement("div"); d.className="sort-bin"; d.dataset.bin=bn.id;
+      d.style.background="linear-gradient(180deg,#fff,"+bn.color+")";
+      d.innerHTML=`<span class="be">${bn.e}</span><span class="bn">${bn.n}</span>`;
+      binsEl.appendChild(d);
+    });
+    const items = shuffle(src).slice(0, mode==="garbage"?6:6);
+    remaining = items.length;
+    items.forEach(it=>{
+      const p=document.createElement("div"); p.className="sort-item"; p.dataset.bin=it.bin;
+      p.innerHTML=`<span class="se">${it.e}</span><span class="sl">${it.n}</span>`;
+      trayEl.appendChild(p); wireDrag(p, it);
+    });
+  }
+
+  function wireDrag(piece, it){
+    let sx=0, sy=0, dragging=false;
+    function highlight(ev){
+      const el2=document.elementFromPoint(ev.clientX,ev.clientY);
+      const bin=el2 && el2.closest(".sort-bin");
+      binsEl.querySelectorAll(".sort-bin").forEach(b=>b.classList.toggle("hl", b===bin));
+    }
+    function onDown(ev){ dragging=true; sx=ev.clientX; sy=ev.clientY; piece.classList.add("dragging"); piece.style.transition="none";
+      piece.setPointerCapture && piece.setPointerCapture(ev.pointerId); }
+    function onMove(ev){ if(!dragging)return; piece.style.transform=`translate(${ev.clientX-sx}px,${ev.clientY-sy}px)`; highlight(ev); }
+    function onUp(ev){
+      if(!dragging)return; dragging=false; piece.classList.remove("dragging");
+      binsEl.querySelectorAll(".sort-bin").forEach(b=>b.classList.remove("hl"));
+      piece.style.pointerEvents="none";
+      const target=document.elementFromPoint(ev.clientX,ev.clientY);
+      piece.style.pointerEvents="";
+      const bin=target && target.closest(".sort-bin");
+      if(bin && bin.dataset.bin===piece.dataset.bin){
+        piece.classList.add("placed"); ensureAudio(); sfx("pop"); speak(it.n, false);
+        remaining--; if(remaining<=0) finishRound();
+      }else{
+        if(bin){ sfx("thud"); speak("ลองใหม่นะ", false); }
+        piece.style.transition="transform .25s"; piece.style.transform="translate(0px,0px)";
+        setTimeout(()=>{ piece.style.transition=""; }, 260);
+      }
+    }
+    piece.addEventListener("pointerdown", onDown);
+    piece.addEventListener("pointermove", onMove);
+    piece.addEventListener("pointerup", onUp);
+    piece.addEventListener("pointercancel", onUp);
+  }
+
+  function finishRound(){
+    rounds++; scoreEl.textContent=rounds;
+    clapHands(true); celebrate(true); speak(praiseMessage(), true);
+    setTimeout(newRound, 1600);
+  }
+
+  function open(){ ensureAudio(); if(!built) build(); mode="garbage";
+    if(el.querySelector('.sort-mode')) el.querySelectorAll(".sort-mode").forEach(x=>x.classList.toggle("active",x.dataset.m==="garbage"));
+    newRound(); el.classList.remove("hidden"); }
   function close(){ el.classList.add("hidden"); }
   return { open, close };
 })();
