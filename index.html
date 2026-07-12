@@ -890,7 +890,9 @@ function emojiImgURL(e){
 }
 
 /* ---- real photos (self-hosted), with emoji fallback ---- */
-const PHOTO_CATS = new Set(["animals","vehicles","carjobs","instruments","nature","travel","table","body","daily","letters","alpha","cook","jobs"]);
+/* photos disabled — kids prefer the cartoon emoji icons, and they're instant + tiny.
+   (emoji rendering everywhere via the fallback path; add a category id here to re-enable photos for it.) */
+const PHOTO_CATS = new Set([]);
 function hasPhoto(catId){ return PHOTO_CATS.has(catId); }
 function photoSrc(catId, key){ return "images/"+catId+"/"+encodeURIComponent(key)+".jpg"; }
 /* returns HTML: an <img> when a photo exists for this category, else an emoji <span>.
