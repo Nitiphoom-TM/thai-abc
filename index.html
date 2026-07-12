@@ -960,34 +960,48 @@ fetch("tts/manifest.json").then(r=>r.ok?r.json():null).then(m=>{ ttsManifest=m; 
 const ttsAudioEl = new Audio();      // one reusable element, keeps iOS's "unlocked after first gesture" state
 ttsAudioEl.preload = "auto";
 
-function playEdgeVoice(text, lang){
+function playEdgeVoice(text, lang, onEnded){
   if(!ttsManifest) return false;
   const map = ttsManifest[lang==="en" ? "en" : "th"];
   const fname = map && map[text];
   if(!fname) return false;
   try{
     ttsAudioEl.pause();
+    ttsAudioEl.onended = onEnded || null;
     ttsAudioEl.src = "tts/"+(lang==="en"?"en":"th")+"/"+fname;
     ttsAudioEl.currentTime = 0;
     ttsAudioEl.volume = 1;
     const p = ttsAudioEl.play();
-    if(p && p.catch) p.catch(()=>speakWebFallback(text, lang));
+    if(p && p.catch) p.catch(()=>speakWebFallback(text, lang, onEnded));
     return true;
   }catch(e){ return false; }
 }
-function speakWebFallback(text, lang){
-  if(!("speechSynthesis" in window)) return;
+function speakWebFallback(text, lang, onEnded){
+  if(!("speechSynthesis" in window)){ if(onEnded) onEnded(); return; }
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   if(lang==="en"){ u.lang="en-US"; if(enVoice) u.voice=enVoice; }
   else { u.lang="th-TH"; if(thaiVoice) u.voice=thaiVoice; }
   u.rate=0.85; u.pitch=1.1; u.volume=1;  // loudest
+  if(onEnded){ u.onend=onEnded; u.onerror=onEnded; }
   speechSynthesis.speak(u);
+}
+function speakOne(text, lang, onDone){
+  if(playEdgeVoice(text, lang, onDone)) return;   // primary: pre-generated Edge Neural TTS
+  speakWebFallback(text, lang, onDone);           // fallback: on-device speech
 }
 function speak(text, withPop, lang){
   if(withPop) sfx("pop");
-  if(playEdgeVoice(text, lang)) return;     // primary: pre-generated Edge Neural TTS
-  speakWebFallback(text, lang);             // fallback: on-device speech
+  speakOne(text, lang, null);
+}
+/* Plays a list of phrases back-to-back (e.g. a fixed line + one of a known set of praise
+   messages) so every segment can still hit the pre-generated Edge voice individually, instead
+   of needing every possible concatenation pre-generated. */
+function speakSeq(parts, lang){
+  const queue = parts.filter(Boolean);
+  let i = 0;
+  function next(){ if(i < queue.length) speakOne(queue[i++], lang, next); }
+  next();
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
 
@@ -1202,7 +1216,7 @@ function choose(catId, btn, item){
     clapHands(newBest);
     if(newBest && g.score>0 && prevBest>0){
       g.feedbackEl.textContent="ทำลายสถิติ! 🏆 +"+gain+" — "+praise;
-      celebrate(true); setTimeout(()=>speak("เยี่ยมมาก ทำลายสถิติ "+praise),350);
+      celebrate(true); setTimeout(()=>speakSeq(["เยี่ยมมาก ทำลายสถิติ", praise]),350);
     }else{
       g.feedbackEl.textContent="🎉 "+g.current.label+"  +"+gain+" — "+praise;
       celebrate(false); setTimeout(()=>speak(praise),350);
@@ -1466,10 +1480,10 @@ const Cooking = (function(){
     resultEl.querySelector("#eatBtn").addEventListener("click",eat);
     resultEl.querySelector("#sellBtn").addEventListener("click",sell);
   }
-  function eat(){ sfx("boing"); clapHands(false); speak("อร่อยจัง อิ่มแล้ว "+praiseMessage(), true); celebrate(true); clearAll(); }
+  function eat(){ sfx("boing"); clapHands(false); sfx("pop"); speakSeq(["อร่อยจัง อิ่มแล้ว", praiseMessage()]); celebrate(true); clearAll(); }
   function sell(){
     coins+=result.price; localStorage.setItem("cook_coins",String(coins)); coinEl.textContent=coins;
-    sfx("coin"); clapHands(false); speak("ขายได้ "+result.price+" เหรียญ "+praiseMessage(), true); celebrate(true); clearAll();
+    sfx("coin"); clapHands(false); speakSeq(["ขายได้เหรียญแล้ว", praiseMessage()]); celebrate(true); clearAll();
   }
   function clearAll(){
     pot=[]; method=null; result=null; renderPot(); if(methodPickEl) methodPickEl.textContent=""; if(resultEl) resultEl.innerHTML="";
@@ -1526,7 +1540,7 @@ const CarShop = (function(){
     }));
     el.querySelector("#hornBtn").addEventListener("click",()=>{ ensureAudio(); playCritter("honk"); blinkHeadlight(); });
     el.querySelector("#resetBtn").addEventListener("click",reset);
-    el.querySelector("#doneBtn").addEventListener("click",()=>{ sfx("boing"); clapHands(false); speak("รถสวยมากเลย "+praiseMessage(),true); celebrate(true); playCritter("honk"); blinkHeadlight(); });
+    el.querySelector("#doneBtn").addEventListener("click",()=>{ sfx("boing"); clapHands(false); speakSeq(["รถสวยมากเลย", praiseMessage()]); celebrate(true); playCritter("honk"); blinkHeadlight(); });
     built=true;
   }
   let curColor=SWATCHES[0].c, curColorName=SWATCHES[0].n;
@@ -1721,7 +1735,7 @@ const ScratchGame = (function(){
       revealed=true;
       ctxTop.clearRect(0,0,top.width,top.height);
       clapHands(true); celebrate(true);
-      speak(cur.n+" ไงจ๊ะ "+praiseMessage(), true);
+      sfx("pop"); speakSeq([cur.n+" ไงจ๊ะ", praiseMessage()]);
     }
   }
 
@@ -1884,7 +1898,7 @@ const PeekabooGame = (function(){
       bush.classList.remove("wiggle"); bush.classList.add("opened");
       const a=spot.querySelector(".pk-animal"); a.classList.add("show");
       playCritter(cur.kind); celebrate(false); clapHands(false);
-      setTimeout(()=>speak("นี่คือคุณ"+cur.n+"! "+praiseMessage(), false), 450);
+      setTimeout(()=>speakSeq(["นี่คือคุณ"+cur.n+"!", praiseMessage()]), 450);
       setTimeout(newRound, 2600);
     }else{
       // gentle: bush opens empty briefly, no "wrong" feedback
@@ -1955,7 +1969,7 @@ const SoundTapGame = (function(){
       answered=true;
       btn.classList.add("happy");
       playCritter(it.kind); celebrate(false); clapHands(false);
-      setTimeout(()=>speak("ใช่แล้ว คุณ"+it.n+" "+praiseMessage(), false), 500);
+      setTimeout(()=>speakSeq(["ใช่แล้ว คุณ"+it.n, praiseMessage()]), 500);
       setTimeout(newRound, 2500);
     }else{
       // no wrong marks — everyone else wiggles as a gentle invitation to try again
@@ -1973,7 +1987,7 @@ const SoundTapGame = (function(){
 document.getElementById("startBtn").addEventListener("click", ()=>{
   document.getElementById("overlay").classList.add("hidden");
   ensureAudio();
-  speak("มาเรียนกันเลย "+CHILD_NAME);
+  speakSeq(["ยินดีต้อนรับ"+CHILD_NAME, "มาเรียนกันเลย "+CHILD_NAME]);
 });
 
 /* ================= SETTINGS PANEL ================= */
