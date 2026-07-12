@@ -164,6 +164,7 @@
   .swatch:active{transform:translateY(3px); box-shadow:0 1px 0 #d9c7b0, var(--shadow-sm);}
   .swatch .sw{width:100%; height:30px; border-radius:9px; border:2px solid rgba(0,0,0,.08);}
   .swatch .sn{font-size:.6rem; color:var(--muted); font-weight:700;}
+  .swatch.sel{outline:4px solid #3a5bd9; outline-offset:2px; transform:scale(1.06);}
   .shop-actions{display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap;}
 
   /* ---- 3D learn grid ---- */
@@ -395,6 +396,46 @@
   .sort-item .se{font-size:2rem; line-height:1;}
   .sort-item .sl{font-size:.56rem; color:var(--muted); font-weight:700; text-align:center; padding:0 2px;}
   .sort-item.placed{visibility:hidden;}
+
+  /* ---- peek-a-boo animals ---- */
+  .peekaboo{width:100%; max-width:620px; margin:0 auto; padding:0 4px 30px; animation:fade .3s ease; text-align:center;}
+  .peekaboo.hidden{display:none;}
+  .pk-stage{background:linear-gradient(180deg,#d3f9d8,#8ce99a); border-radius:26px; padding:30px 14px 34px;
+    box-shadow:var(--shadow-lg), inset 0 2px 3px rgba(255,255,255,.8);}
+  .pk-hint{font-weight:800; color:#2b6b3a; margin:0 0 20px; font-size:clamp(.95rem,4vw,1.15rem); text-shadow:0 1px 0 rgba(255,255,255,.6);}
+  .pk-row{display:flex; justify-content:space-around; gap:10px; align-items:flex-end;}
+  .pk-spot{position:relative; width:30%; max-width:150px; aspect-ratio:1; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+  .pk-animal{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:clamp(3.2rem,16vw,5rem); opacity:0; transform:translateY(30%) scale(.5); pointer-events:none;}
+  .pk-animal.show{animation:pkjump .7s cubic-bezier(.3,1.5,.4,1) forwards;}
+  @keyframes pkjump{0%{opacity:0; transform:translateY(35%) scale(.4);}60%{opacity:1; transform:translateY(-18%) scale(1.15);}100%{opacity:1; transform:translateY(0) scale(1);}}
+  .pk-bush{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:clamp(3.6rem,18vw,5.6rem); filter:drop-shadow(0 8px 6px rgba(40,90,50,.35)); transition:opacity .25s, transform .25s; z-index:2;}
+  .pk-bush.wiggle{animation:pkwiggle 1.4s ease-in-out infinite;}
+  .pk-bush.opened{opacity:0; transform:translateY(28%) scale(.75);}
+  @keyframes pkwiggle{0%,100%{transform:rotate(0) translateY(0);}25%{transform:rotate(-6deg) translateY(-4px);}50%{transform:rotate(0) translateY(0);}75%{transform:rotate(6deg) translateY(-4px);}}
+  .pk-bush.shake{animation:pkshake .45s ease-in-out;}
+  @keyframes pkshake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px) rotate(-5deg);}50%{transform:translateX(8px) rotate(5deg);}75%{transform:translateX(-5px);}}
+
+  /* ---- simple sound tap ---- */
+  .soundtap{width:100%; max-width:620px; margin:0 auto; padding:0 4px 30px; animation:fade .3s ease; text-align:center;}
+  .soundtap.hidden{display:none;}
+  .st-stage{background:linear-gradient(180deg,#ffffff,#fff4e2); border-radius:26px; padding:22px 14px 28px;
+    box-shadow:var(--shadow-lg), inset 0 2px 3px rgba(255,255,255,.9);}
+  .st-q{font-weight:800; color:#5a3d2b; font-size:clamp(1.05rem,4.6vw,1.4rem); margin:0 0 8px; min-height:1.5em;}
+  .st-replay{border:none; cursor:pointer; font-family:inherit; font-weight:800; color:#fff; font-size:clamp(1rem,4.4vw,1.25rem);
+    padding:13px 24px; border-radius:20px; background:linear-gradient(180deg,#8fc4ff,#4a97dd);
+    box-shadow:0 7px 0 #3877b3, var(--shadow-sm); margin:6px 0 20px; transition:transform .08s, box-shadow .08s;}
+  .st-replay:active{transform:translateY(4px); box-shadow:0 3px 0 #3877b3, var(--shadow-sm);}
+  .st-row{display:flex; justify-content:center; gap:16px; flex-wrap:wrap;}
+  .st-btn{border:none; cursor:pointer; font-family:inherit; width:clamp(110px,30vw,160px); aspect-ratio:1;
+    border-radius:26px; background:radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,.9), rgba(255,255,255,0) 60%), linear-gradient(180deg,#fff,#fff2df);
+    box-shadow:0 10px 0 #e7c79a, 0 16px 22px -8px rgba(90,60,30,.4), inset 0 2px 2px rgba(255,255,255,.8);
+    display:flex; align-items:center; justify-content:center; transition:transform .1s, box-shadow .1s;}
+  .st-btn:active{transform:translateY(6px); box-shadow:0 3px 0 #e7c79a, var(--shadow-sm);}
+  .st-btn .se{font-size:clamp(3.4rem,17vw,5.4rem); line-height:1; filter:drop-shadow(0 3px 2px rgba(0,0,0,.18)); display:block;}
+  .st-btn.happy .se{animation:pkjump .7s cubic-bezier(.3,1.5,.4,1);}
+  .st-btn.nudge .se{animation:pkwiggle .9s ease-in-out;}
 </style>
 </head>
 <body>
@@ -441,6 +482,8 @@
 <div id="shadowgame" class="shadowgame hidden"></div>
 <div id="scratchgame" class="scratchgame hidden"></div>
 <div id="sortgame" class="sorting hidden"></div>
+<div id="peekaboo" class="peekaboo hidden"></div>
+<div id="soundtap" class="soundtap hidden"></div>
 <footer>สร้างเพื่อการเรียนรู้ • เสียงในเครื่อง (Web Speech) • เล่นได้ทุกอุปกรณ์</footer>
 
 <div class="viewer" id="viewer">
@@ -726,6 +769,8 @@ const CATEGORIES = [
   {id:"shadow", label:"จับคู่เงา", icon:"🌑", group:"play", shadow:true},
   {id:"scratch", label:"ขูดภาพระบายสี", icon:"🖍️", group:"play", scratch:true},
   {id:"sorting", label:"แยกขยะ-เก็บของ", icon:"🗑️", group:"play", sorting:true},
+  {id:"peekaboo", label:"ซ่อนแอบสัตว์โลก", icon:"🌳", group:"play", peekaboo:true},
+  {id:"soundtap", label:"จิ้มทายเสียง", icon:"👆", group:"play", soundtap:true},
 ];
 
 /* --- cooking game data (free-play, Thai + international) --- */
@@ -864,6 +909,7 @@ function playCritter(kind){
     case "whoosh": noiseBurst(.4,.3,1200,t); break;
     case "drum": noiseBurst(.15,.6,120,t); tone(140,60,.15,"sine",.5,t); break;
     case "pluck": tone(500,300,.4,"triangle",.5,t); break;
+    case "spray": noiseBurst(.45,.55,4200,t); break;
   }
 }
 
@@ -1125,12 +1171,14 @@ function selectCat(catId){
   appSub.classList.add("hidden");
   document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
   window.scrollTo(0,0);
-  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close(); SortingGame.close();
+  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close(); SortingGame.close(); PeekabooGame.close(); SoundTapGame.close();
   if(cat.cooking){ subtabsEl.style.display="none"; Cooking.open(); return; }   // cooking screen
   if(cat.carshop){ subtabsEl.style.display="none"; CarShop.open(); return; }   // car customize screen
   if(cat.shadow){ subtabsEl.style.display="none"; ShadowGame.open(); return; }   // shadow-matching screen
   if(cat.scratch){ subtabsEl.style.display="none"; ScratchGame.open(); return; } // scratch & reveal screen
   if(cat.sorting){ subtabsEl.style.display="none"; SortingGame.open(); return; } // sorting screen
+  if(cat.peekaboo){ subtabsEl.style.display="none"; PeekabooGame.open(); return; } // peek-a-boo screen
+  if(cat.soundtap){ subtabsEl.style.display="none"; SoundTapGame.open(); return; } // sound-tap screen
   subtabsEl.style.display="";
   subtabsEl.classList.toggle("solo", !!cat.activity);   // activity = no game mode
   document.querySelectorAll(".subtab").forEach(x=>x.classList.toggle("active", x.dataset.mode==="learn"));
@@ -1144,7 +1192,7 @@ function goHome(){
   appSub.classList.remove("hidden");
   subtabsEl.style.display="";
   document.querySelectorAll(".cat-panel").forEach(p=>p.classList.remove("active"));
-  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close(); SortingGame.close();
+  Cooking.close(); CarShop.close(); ShadowGame.close(); ScratchGame.close(); SortingGame.close(); PeekabooGame.close(); SoundTapGame.close();
   window.scrollTo(0,0);
 }
 function applyMode(){
@@ -1397,7 +1445,7 @@ const CarShop = (function(){
           <path d="M140 92 L160 60 L174 60 L174 92 Z" fill="#cdeffd"/>
           <path d="M184 92 L184 62 L198 62 Q206 62 211 70 L226 92 Z" fill="#cdeffd"/>
           <rect id="body" class="paintable" x="28" y="92" width="264" height="64" rx="28" fill="${DEF.body}"/>
-          <circle cx="286" cy="112" r="7" fill="#fff3b0"/>
+          <circle id="headlight" cx="286" cy="112" r="7" fill="#fff3b0"/>
           <circle cx="95" cy="160" r="33" fill="#2b2b2b"/>
           <circle id="wheelL" class="paintable" cx="95" cy="160" r="21" fill="${DEF.wheels}"/>
           <circle cx="95" cy="160" r="7" fill="#8a8a8a"/>
@@ -1406,43 +1454,50 @@ const CarShop = (function(){
           <circle cx="227" cy="160" r="7" fill="#8a8a8a"/>
         </svg>
       </div>
-      <div class="pal-title">🔧 เลือกส่วนที่จะแต่ง</div>
-      <div class="parts">${PARTS.map(p=>`<button class="part" data-p="${p.id}"><span class="pe">${p.e}</span><span class="pl">${p.l}</span></button>`).join("")}</div>
-      <div class="pal-title">🎨 เลือกสี (แตะเพื่อทาสี)</div>
+      <div class="pal-title">🎨 1. จิ้มถังสี → 2. แตะที่รถได้เลย!</div>
       <div class="swatches">${SWATCHES.map(s=>`<button class="swatch" data-c="${s.c}" data-n="${s.n}"><span class="sw" style="background:${s.c}"></span><span class="sn">${s.n}</span></button>`).join("")}</div>
       <div class="shop-actions">
-        <button class="cbtn cook" id="randBtn">🎲 สุ่มสี</button>
+        <button class="cbtn cook" id="hornBtn">📣 บีบแตร</button>
         <button class="cbtn clear" id="resetBtn">🔄 เริ่มใหม่</button>
         <button class="cbtn eat" id="doneBtn">🎉 เสร็จแล้ว!</button>
       </div>`;
-    el.querySelectorAll(".part").forEach(b=>b.addEventListener("click",()=>selectPart(b.dataset.p)));
-    el.querySelectorAll(".swatch").forEach(b=>b.addEventListener("click",()=>paint(b.dataset.c,b.dataset.n)));
+    el.querySelectorAll(".swatch").forEach(b=>b.addEventListener("click",()=>pickColor(b)));
     el.querySelectorAll(".paintable").forEach(s=>s.addEventListener("click",()=>{
-      const id = s.id==="wheelL"||s.id==="wheelR" ? "wheels" : s.id; selectPart(id);
+      const id = s.id==="wheelL"||s.id==="wheelR" ? "wheels" : s.id; paintPart(id);
     }));
-    el.querySelector("#randBtn").addEventListener("click",randomize);
+    el.querySelector("#hornBtn").addEventListener("click",()=>{ ensureAudio(); playCritter("honk"); blinkHeadlight(); });
     el.querySelector("#resetBtn").addEventListener("click",reset);
-    el.querySelector("#doneBtn").addEventListener("click",()=>{ sfx("boing"); clapHands(false); speak("รถสวยมากเลย "+praiseMessage(),true); celebrate(true); });
+    el.querySelector("#doneBtn").addEventListener("click",()=>{ sfx("boing"); clapHands(false); speak("รถสวยมากเลย "+praiseMessage(),true); celebrate(true); playCritter("honk"); blinkHeadlight(); });
     built=true;
   }
-  function updateSel(){
-    el.querySelectorAll(".part").forEach(b=>b.classList.toggle("sel", b.dataset.p===sel));
-    el.querySelectorAll(".paintable").forEach(e=>e.classList.remove("psel"));
-    partEls(sel).forEach(e=>e&&e.classList.add("psel"));
-  }
-  function selectPart(id){ sel=id; ensureAudio(); sfx("pop"); updateSel(); }
-  function paint(color, name){
+  let curColor=SWATCHES[0].c, curColorName=SWATCHES[0].n;
+  function pickColor(btn){
     ensureAudio(); sfx("pop");
-    partEls(sel).forEach(e=>e&&e.setAttribute("fill",color));
-    speak(name, false);
+    curColor=btn.dataset.c; curColorName=btn.dataset.n;
+    el.querySelectorAll(".swatch").forEach(x=>x.classList.toggle("sel", x===btn));
+    speak(curColorName, false);
   }
-  function randomize(){
-    ensureAudio(); sfx("boing");
-    PARTS.forEach(p=>{ const c=SWATCHES[(Math.random()*SWATCHES.length)|0].c; partEls(p.id).forEach(e=>e&&e.setAttribute("fill",c)); });
+  function blinkHeadlight(){
+    const h=el.querySelector("#headlight"); if(!h) return;
+    let n=0; const iv=setInterval(()=>{
+      h.setAttribute("fill", n%2===0 ? "#fff740" : "#fff3b0");
+      h.setAttribute("r", n%2===0 ? "10" : "7");
+      if(++n>=6){ clearInterval(iv); h.setAttribute("fill","#fff3b0"); h.setAttribute("r","7"); }
+    }, 130);
+  }
+  function paintPart(id){
+    ensureAudio();
+    partEls(id).forEach(e=>e&&e.setAttribute("fill",curColor));
+    playCritter("spray");                       // ฟู่!
+    blinkHeadlight();                           // ไฟหน้ากะพริบปิ๊งๆ
+    if(Math.random()<0.4) setTimeout(()=>playCritter("honk"), 500);  // บางทีบีบแตรแป๊นๆ
+    setTimeout(()=>speak(curColorName, false), 450);
   }
   function reset(){ ensureAudio(); sfx("pop"); partEls("body")[0].setAttribute("fill",DEF.body);
     partEls("roof")[0].setAttribute("fill",DEF.roof); partEls("wheels").forEach(e=>e.setAttribute("fill",DEF.wheels)); }
-  function open(){ ensureAudio(); if(!built) build(); sel="body"; updateSel(); el.classList.remove("hidden"); }
+  function open(){ ensureAudio(); if(!built) build();
+    const first=el.querySelector(".swatch"); if(first){ el.querySelectorAll(".swatch").forEach(x=>x.classList.remove("sel")); first.classList.add("sel"); curColor=first.dataset.c; curColorName=first.dataset.n; }
+    el.classList.remove("hidden"); }
   function close(){ el.classList.add("hidden"); }
   return { open, close };
 })();
@@ -1720,6 +1775,138 @@ const SortingGame = (function(){
   function open(){ ensureAudio(); if(!built) build(); mode="garbage";
     if(el.querySelector('.sort-mode')) el.querySelectorAll(".sort-mode").forEach(x=>x.classList.toggle("active",x.dataset.m==="garbage"));
     newRound(); el.classList.remove("hidden"); }
+  function close(){ el.classList.add("hidden"); }
+  return { open, close };
+})();
+
+/* ================= PEEK-A-BOO ANIMALS (ซ่อนแอบสัตว์โลก) ================= */
+const PeekabooGame = (function(){
+  const el=document.getElementById("peekaboo");
+  const CAST=[
+    {n:"วัว",e:"🐄",kind:"moo"},{n:"สุนัข",e:"🐶",kind:"bark"},{n:"แมว",e:"🐱",kind:"meow"},
+    {n:"ไก่",e:"🐔",kind:"cluck"},{n:"เป็ด",e:"🦆",kind:"quack"},{n:"หมู",e:"🐷",kind:"oink"},
+    {n:"ช้าง",e:"🐘",kind:"trumpet"},{n:"ม้า",e:"🐴",kind:"neigh"},{n:"สิงโต",e:"🦁",kind:"roar"},
+    {n:"กบ",e:"🐸",kind:"croak"},{n:"ลิง",e:"🐒",kind:"monkey"},{n:"แกะ",e:"🐑",kind:"bleat"},
+  ];
+  const COVERS=["🌳","🌲","🎁"];
+  let built=false, cur=null, hideIdx=0, answered=false, hintTimer=null;
+
+  function build(){
+    el.innerHTML=`
+      <div class="pk-stage">
+        <p class="pk-hint" id="pkHint">🙈 ฟังเสียงดีๆ… เพื่อนตัวไหนซ่อนอยู่ตรงไหนนะ? จิ้มเลย!</p>
+        <div class="pk-row" id="pkRow"></div>
+      </div>`;
+    built=true;
+  }
+  function newRound(){
+    answered=false;
+    cur=CAST[(Math.random()*CAST.length)|0];
+    hideIdx=(Math.random()*3)|0;
+    const row=el.querySelector("#pkRow"); row.innerHTML="";
+    for(let i=0;i<3;i++){
+      const spot=document.createElement("div"); spot.className="pk-spot";
+      const cover=COVERS[(Math.random()*COVERS.length)|0];
+      spot.innerHTML=`<span class="pk-animal">${i===hideIdx?cur.e:""}</span><span class="pk-bush wiggle">${cover}</span>`;
+      spot.addEventListener("pointerdown",()=>tap(spot,i));
+      row.appendChild(spot);
+    }
+    // soft hint sound from the hidden friend, repeating gently
+    clearInterval(hintTimer);
+    setTimeout(()=>playCritter(cur.kind), 500);
+    hintTimer=setInterval(()=>{ if(!answered && !el.classList.contains("hidden")) playCritter(cur.kind); }, 3200);
+  }
+  function tap(spot,i){
+    if(answered) return;
+    ensureAudio();
+    const bush=spot.querySelector(".pk-bush");
+    if(i===hideIdx){
+      answered=true; clearInterval(hintTimer);
+      bush.classList.remove("wiggle"); bush.classList.add("opened");
+      const a=spot.querySelector(".pk-animal"); a.classList.add("show");
+      playCritter(cur.kind); celebrate(false); clapHands(false);
+      setTimeout(()=>speak("นี่คือคุณ"+cur.n+"! "+praiseMessage(), false), 450);
+      setTimeout(newRound, 2600);
+    }else{
+      // gentle: bush opens empty briefly, no "wrong" feedback
+      bush.classList.remove("wiggle"); bush.classList.add("shake");
+      sfx("pop"); speak("ไม่อยู่ตรงนี้จ้า ลองอีกที", false);
+      setTimeout(()=>{ bush.classList.remove("shake"); bush.classList.add("wiggle"); }, 500);
+    }
+  }
+  function open(){ ensureAudio(); if(!built) build(); el.classList.remove("hidden"); newRound(); }
+  function close(){ el.classList.add("hidden"); clearInterval(hintTimer); }
+  return { open, close };
+})();
+
+/* ================= SIMPLE SOUND TAP (จิ้มทายเสียง) ================= */
+const SoundTapGame = (function(){
+  const el=document.getElementById("soundtap");
+  const CAST=[
+    {n:"แมว",e:"🐱",kind:"meow",q:"เหมียว เหมียว"},
+    {n:"สุนัข",e:"🐶",kind:"bark",q:"โฮ่ง โฮ่ง"},
+    {n:"วัว",e:"🐄",kind:"moo",q:"มอ มอ"},
+    {n:"ไก่",e:"🐔",kind:"cluck",q:"กุ๊ก กุ๊ก"},
+    {n:"เป็ด",e:"🦆",kind:"quack",q:"ก๊าบ ก๊าบ"},
+    {n:"หมู",e:"🐷",kind:"oink",q:"อู๊ด อู๊ด"},
+    {n:"กบ",e:"🐸",kind:"croak",q:"อ๊บ อ๊บ"},
+    {n:"สิงโต",e:"🦁",kind:"roar",q:"โฮกกก"},
+    {n:"ช้าง",e:"🐘",kind:"trumpet",q:"แปร๊นๆ"},
+    {n:"รถตำรวจ",e:"🚓",kind:"siren_police",q:"วี้หว่อ วี้หว่อ"},
+    {n:"รถไฟ",e:"🚆",kind:"train_chug",q:"ฉึกฉัก ฉึกฉัก"},
+    {n:"รถยนต์",e:"🚗",kind:"honk",q:"ปี๊น ปี๊น"},
+  ];
+  let built=false, cur=null, answered=false, qEl, rowEl;
+
+  function build(){
+    el.innerHTML=`
+      <div class="st-stage">
+        <p class="st-q" id="stQ"></p>
+        <button class="st-replay" id="stReplay">🔊 ฟังอีกครั้ง</button>
+        <div class="st-row" id="stRow"></div>
+      </div>`;
+    qEl=el.querySelector("#stQ"); rowEl=el.querySelector("#stRow");
+    el.querySelector("#stReplay").addEventListener("click", ask);
+    built=true;
+  }
+  function ask(){
+    if(!cur) return;
+    ensureAudio();
+    speak("ตัวไหนร้อง "+cur.q+" นะ?", false);
+    setTimeout(()=>playCritter(cur.kind), 1900);
+  }
+  function newRound(){
+    answered=false;
+    const pool=shuffle(CAST).slice(0,3);
+    cur=pool[(Math.random()*pool.length)|0];
+    qEl.textContent="ตัวไหนร้อง \""+cur.q+"\" นะ? 🤔";
+    rowEl.innerHTML="";
+    pool.forEach(it=>{
+      const b=document.createElement("button"); b.className="st-btn";
+      b.innerHTML=`<span class="se">${it.e}</span>`;
+      b.addEventListener("click",()=>tap(b,it));
+      rowEl.appendChild(b);
+    });
+    setTimeout(ask, 400);
+  }
+  function tap(btn,it){
+    if(answered) return;
+    ensureAudio();
+    if(it.n===cur.n){
+      answered=true;
+      btn.classList.add("happy");
+      playCritter(it.kind); celebrate(false); clapHands(false);
+      setTimeout(()=>speak("ใช่แล้ว คุณ"+it.n+" "+praiseMessage(), false), 500);
+      setTimeout(newRound, 2500);
+    }else{
+      // no wrong marks — everyone else wiggles as a gentle invitation to try again
+      [...rowEl.children].forEach(b=>{ if(b!==btn){ b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); } });
+      playCritter(it.kind);   // tapped one still makes its own fun sound
+      setTimeout(()=>speak("ลองฟังอีกทีนะ", false), 700);
+      setTimeout(ask, 2000);
+    }
+  }
+  function open(){ ensureAudio(); if(!built) build(); el.classList.remove("hidden"); newRound(); }
   function close(){ el.classList.add("hidden"); }
   return { open, close };
 })();
