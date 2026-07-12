@@ -583,6 +583,15 @@ const NATURE = [
   {n:"หิมะ",e:"❄️"},{n:"ลม",e:"💨"},
 ];
 
+/* --- fruits --- */
+const FRUITS = [
+  {n:"กล้วย",e:"🍌"},{n:"แอปเปิล",e:"🍎"},{n:"ส้ม",e:"🍊"},{n:"องุ่น",e:"🍇"},
+  {n:"แตงโม",e:"🍉"},{n:"สตรอว์เบอร์รี",e:"🍓"},{n:"สับปะรด",e:"🍍"},{n:"มะม่วง",e:"🥭"},
+  {n:"เชอร์รี",e:"🍒",},{n:"พีช",e:"🍑"},{n:"ลูกแพร์",e:"🍐"},{n:"มะพร้าว",e:"🥥"},
+  {n:"เลมอน",e:"🍋"},{n:"กีวี",e:"🥝"},{n:"มะเขือเทศ",e:"🍅"},{n:"บลูเบอร์รี",e:"🫐"},
+  {n:"เมลอน",e:"🍈"},{n:"อะโวคาโด",e:"🥑"},
+];
+
 /* --- occupations --- */
 const JOBS = [
   {n:"หมอ",e:"🧑‍⚕️"},{n:"พยาบาล",e:"👩‍⚕️"},{n:"ตำรวจ",e:"👮"},{n:"ทหาร",e:"💂"},
@@ -689,6 +698,7 @@ const norm = {
   instruments: INSTRUMENTS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
   nature:  NATURE.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
   jobs:    JOBS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
+  fruits:  FRUITS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
 };
 
 const CATEGORIES = [
@@ -701,6 +711,7 @@ const CATEGORIES = [
   {id:"travel", label:"การเดินทาง", icon:"✈️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
   {id:"body", label:"ร่างกาย", icon:"🧍", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
   {id:"table", label:"บนโต๊ะอาหาร", icon:"🍽️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
+  {id:"fruits", label:"ผลไม้", icon:"🍎", type:"pic", group:"learn", prompt:"ฟังชื่อผลไม้แล้วเลือกรูปที่ถูก"},
   {id:"colors", label:"สีต่างๆ", icon:"🌈", type:"pic", group:"learn", prompt:"ฟังชื่อสีแล้วเลือกสีที่ถูก"},
   {id:"animals", label:"สัตว์", icon:"🐘", type:"pic", group:"learn", prompt:"ฟังชื่อสัตว์แล้วเลือกรูปที่ถูก"},
   {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก"},
