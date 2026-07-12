@@ -94,7 +94,9 @@
   .menu-card:active{transform:translateY(6px); box-shadow:0 2px 0 var(--e), 0 8px 12px -6px rgba(90,60,30,.4), inset 0 2px 2px rgba(255,255,255,.7);}
   .menu-card .mi{font-size:2.2rem; line-height:1; width:2.6rem; text-align:center; flex:none; font-weight:800;
     filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
+  .menu-card .mtx{display:flex; flex-direction:column; gap:3px; min-width:0;}
   .menu-card .mt{font-weight:800; font-size:clamp(.95rem,3.8vw,1.15rem); line-height:1.15;}
+  .menu-card .md{font-size:clamp(.68rem,2.6vw,.78rem); font-weight:600; color:#5a4632; opacity:.85; line-height:1.3;}
 
   /* ---- category bar ---- */
   .catbar{display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
@@ -652,12 +654,36 @@ const COLORS = [
 
 /* --- vehicles & their jobs (usage game) --- */
 const CARJOBS = [
-  {n:"รถดับเพลิง",e:"🚒",use:"ดับไฟ"},{n:"รถพยาบาล",e:"🚑",use:"พาคนป่วยไปโรงพยาบาล"},
-  {n:"รถตำรวจ",e:"🚓",use:"จับผู้ร้าย"},{n:"รถบัส",e:"🚌",use:"พาเด็กไปโรงเรียน"},
-  {n:"รถบรรทุก",e:"🚚",use:"ขนของหนัก"},{n:"รถแท็กซี่",e:"🚕",use:"รับส่งผู้โดยสาร"},
-  {n:"รถไถ",e:"🚜",use:"ทำไร่ทำนา (รถทางการเกษตร)"},{n:"เครื่องบิน",e:"✈️",use:"บินบนท้องฟ้า"},
-  {n:"เรือ",e:"⛵",use:"แล่นในน้ำ"},{n:"จรวด",e:"🚀",use:"ไปอวกาศ"},
-  {n:"รถไฟ",e:"🚆",use:"วิ่งบนราง"},{n:"จักรยาน",e:"🚲",use:"ปั่นออกกำลังกาย"},
+  {n:"รถเก๋ง",e:"🚗",use:"พาครอบครัวไปเที่ยว"},{n:"รถกระบะ",e:"🛻",use:"บรรทุกของไปสวน"},
+  {n:"รถแท็กซี่",e:"🚕",use:"รับส่งผู้โดยสาร"},{n:"รถตู้",e:"🚐",use:"พาคนไปหลายๆ คน"},
+  {n:"รถบัส",e:"🚌",use:"พาคนไปทำงาน"},{n:"รถโรงเรียน",e:"🚍",use:"พาเด็กไปโรงเรียน"},
+  {n:"มอเตอร์ไซค์",e:"🏍️",use:"ขับไปตามซอยแคบๆ"},{n:"จักรยาน",e:"🚲",use:"ปั่นออกกำลังกาย"},
+  {n:"ตุ๊กตุ๊ก",e:"🛺",use:"พาเที่ยวชมเมือง"},{n:"รถแข่ง",e:"🏎️",use:"แข่งกันว่าใครเร็วที่สุด"},
+  {n:"รถตำรวจ",e:"🚓",use:"จับผู้ร้าย"},{n:"รถพยาบาล",e:"🚑",use:"พาคนป่วยไปโรงพยาบาล"},
+  {n:"รถดับเพลิง",e:"🚒",use:"ดับไฟ"},{n:"รถบรรทุก",e:"🚚",use:"ขนของหนัก"},
+  {n:"รถขยะ",e:"🚛",use:"เก็บขยะไปทิ้ง"},{n:"รถยก",e:"🛻",use:"ลากรถที่เสียไปซ่อม"},
+  {n:"รถปูน",e:"🚚",use:"ผสมปูนไปสร้างบ้าน"},{n:"รถไถ",e:"🚜",use:"ทำไร่ทำนา"},
+  {n:"รถบด",e:"🚧",use:"บดถนนให้เรียบ"},{n:"รถเกี่ยวข้าว",e:"🚜",use:"เกี่ยวข้าวในนา"},
+  {n:"รถขุด",e:"🏗️",use:"ขุดดินก่อสร้าง"},{n:"รถตักดิน",e:"🏗️",use:"ตักดินตักทราย"},
+  {n:"รถเครน",e:"🏗️",use:"ยกของหนักขึ้นที่สูง"},{n:"รถไฟ",e:"🚆",use:"วิ่งไปบนราง"},
+  {n:"รถไฟฟ้า",e:"🚈",use:"พาคนไปทำงานในเมือง"},{n:"รถไฟไอน้ำ",e:"🚂",use:"วิ่งพ่นควันปู๊นๆ"},
+  {n:"เครื่องบิน",e:"✈️",use:"บินไปเที่ยวเมืองไกลๆ"},{n:"เฮลิคอปเตอร์",e:"🚁",use:"บินช่วยเหลือคน"},
+  {n:"จรวด",e:"🚀",use:"พาไปอวกาศ"},{n:"บอลลูน",e:"🎈",use:"ลอยชมวิวบนฟ้า"},
+  {n:"เรือใบ",e:"⛵",use:"แล่นเล่นในทะเล"},{n:"เรือใหญ่",e:"🚢",use:"ขนสินค้าข้ามประเทศ"},
+  {n:"เรือหางยาว",e:"🚤",use:"พาเที่ยวตามคลอง"},
+];
+
+/* --- household items & their everyday use (usage game) --- */
+const ITEMJOBS = [
+  {n:"จาน",e:"🍽️",use:"ใส่อาหาร"},{n:"ช้อน",e:"🥄",use:"ตักข้าวกิน"},
+  {n:"ส้อม",e:"🍴",use:"จิ้มอาหารกิน"},{n:"แก้วน้ำ",e:"🥛",use:"ใส่น้ำดื่ม"},
+  {n:"หวี",e:"🪮",use:"หวีผมให้เรียบ"},{n:"กระจก",e:"🪞",use:"ส่องดูหน้าตัวเอง"},
+  {n:"แปรงสีฟัน",e:"🪥",use:"แปรงฟันให้สะอาด"},{n:"สบู่",e:"🧼",use:"ฟอกตัวตอนอาบน้ำ"},
+  {n:"ผ้าเช็ดตัว",e:"🧻",use:"เช็ดตัวให้แห้ง"},{n:"ร่ม",e:"☂️",use:"กันฝนกันแดด"},
+  {n:"กุญแจ",e:"🔑",use:"ไขเปิดประตูบ้าน"},{n:"นาฬิกา",e:"⏰",use:"บอกเวลาและปลุกให้ตื่น"},
+  {n:"กรรไกร",e:"✂️",use:"ตัดกระดาษ"},{n:"ร่มกันแดด",e:"🧴",use:"ทาป้องกันแดด"},
+  {n:"แว่นตา",e:"👓",use:"ช่วยให้มองเห็นชัด"},{n:"เตียงนอน",e:"🛏️",use:"นอนหลับพักผ่อน"},
+  {n:"หมอน",e:"🛌",use:"หนุนหัวตอนนอน"},{n:"ตะเกียบ",e:"🥢",use:"คีบอาหารกิน"},
 ];
 
 /* --- characteristic sound archetype per item (played when tapped) --- */
@@ -728,6 +754,7 @@ const norm = {
   letters: LETTERS.map(L=>({big:L.c, emoji:L.e, label:L.c+" "+L.w, say:L.say, key:L.c})),
   colors:  COLORS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.n, key:x.n})),
   carjobs: CARJOBS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.use, key:x.n})),
+  itemjobs: ITEMJOBS.map(x=>({big:x.e, emoji:x.e, label:x.n, say:x.use, key:x.n})),
   vowels:  VOWELS.map(f=>({big:f, emoji:"👄", label:"สระ "+f, say:f, key:f})),
   alpha:   ALPHA.map(a=>({big:a.L, emoji:a.e, label:a.L+" "+a.w, say:a.L+". "+a.w, key:a.L})),
   thainum: TH_DIGIT.map((d,i)=>({big:d, emoji:FINGERS[i], label:d+" "+TH_WORD[i], say:TH_WORD[i], key:"th"+i, native:true})),
@@ -746,31 +773,32 @@ const norm = {
 
 const CATEGORIES = [
   // 📚 เรียนรู้
-  {id:"letters", label:"ก-ฮ", icon:"ก", type:"letter", group:"learn", prompt:"ฟังเสียงแล้วเลือกตัวอักษรที่ถูก"},
-  {id:"vowels", label:"สระไทย", icon:"◌า", type:"letter", group:"learn", prompt:"ฟังเสียงสระแล้วเลือกที่ถูก"},
-  {id:"alpha", label:"A-Z", icon:"A", type:"letter", group:"learn", lang:"en", prompt:"Listen and pick the letter"},
-  {id:"thainum", label:"เลขไทย ๑-๑๐", icon:"๕", type:"num", group:"learn", native:true, prompt:"ฟังแล้วเลือกจำนวนที่ถูก"},
-  {id:"engnum", label:"เลข 1-10", icon:"5", type:"num", group:"learn", native:true, lang:"en", prompt:"Listen and pick the number"},
-  {id:"travel", label:"การเดินทาง", icon:"✈️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
-  {id:"body", label:"ร่างกาย", icon:"🧍", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
-  {id:"table", label:"บนโต๊ะอาหาร", icon:"🍽️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก"},
-  {id:"fruits", label:"ผลไม้", icon:"🍎", type:"pic", group:"learn", prompt:"ฟังชื่อผลไม้แล้วเลือกรูปที่ถูก"},
-  {id:"colors", label:"สีต่างๆ", icon:"🌈", type:"pic", group:"learn", prompt:"ฟังชื่อสีแล้วเลือกสีที่ถูก"},
-  {id:"animals", label:"สัตว์", icon:"🐘", type:"pic", group:"learn", prompt:"ฟังชื่อสัตว์แล้วเลือกรูปที่ถูก"},
-  {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก"},
-  {id:"instruments", label:"เครื่องดนตรี", icon:"🎸", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกเครื่องดนตรีที่ถูก"},
-  {id:"nature", label:"ธรรมชาติ", icon:"🌈", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกภาพที่ถูก"},
-  {id:"jobs", label:"อาชีพ", icon:"👮", type:"pic", group:"learn", prompt:"ฟังชื่ออาชีพแล้วเลือกรูปที่ถูก"},
+  {id:"letters", label:"ก-ฮ", icon:"ก", type:"letter", group:"learn", prompt:"ฟังเสียงแล้วเลือกตัวอักษรที่ถูก", desc:"พยัญชนะไทย 44 ตัว พร้อมคำเชื่อม เช่น ก ไก่"},
+  {id:"vowels", label:"สระไทย", icon:"◌า", type:"letter", group:"learn", prompt:"ฟังเสียงสระแล้วเลือกที่ถูก", desc:"สระไทย 23 รูป ฟังเสียงและจดจำรูปสระ"},
+  {id:"alpha", label:"A-Z", icon:"A", type:"letter", group:"learn", lang:"en", prompt:"Listen and pick the letter", desc:"ตัวอักษรอังกฤษ A-Z พร้อมคำศัพท์ ออกเสียงแบบอังกฤษ"},
+  {id:"thainum", label:"เลขไทย ๑-๑๐", icon:"๕", type:"num", group:"learn", native:true, prompt:"ฟังแล้วเลือกจำนวนที่ถูก", desc:"ตัวเลขไทย ๐-๑๐ แสดงด้วยรูปนิ้วมือให้นับตาม"},
+  {id:"engnum", label:"เลข 1-10", icon:"5", type:"num", group:"learn", native:true, lang:"en", prompt:"Listen and pick the number", desc:"ตัวเลขอังกฤษ 0-10 แสดงด้วยรูปนิ้วมือ ออกเสียงอังกฤษ"},
+  {id:"travel", label:"การเดินทาง", icon:"✈️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก", desc:"คำศัพท์เกี่ยวกับการเดินทาง เครื่องบิน กระเป๋า แผนที่"},
+  {id:"body", label:"ร่างกาย", icon:"🧍", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก", desc:"ส่วนต่างๆ ของร่างกาย ตา หู จมูก มือ เท้า"},
+  {id:"table", label:"บนโต๊ะอาหาร", icon:"🍽️", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกรูปที่ถูก", desc:"ของใช้บนโต๊ะอาหาร จาน ช้อน แก้วน้ำ"},
+  {id:"fruits", label:"ผลไม้", icon:"🍎", type:"pic", group:"learn", prompt:"ฟังชื่อผลไม้แล้วเลือกรูปที่ถูก", desc:"ผลไม้ 18 ชนิด กล้วย แอปเปิล ส้ม มะม่วง"},
+  {id:"colors", label:"สีต่างๆ", icon:"🌈", type:"pic", group:"learn", prompt:"ฟังชื่อสีแล้วเลือกสีที่ถูก", desc:"เรียนรู้สีต่างๆ 10 สี แดง เหลือง เขียว น้ำเงิน"},
+  {id:"animals", label:"สัตว์", icon:"🐘", type:"pic", group:"learn", prompt:"ฟังชื่อสัตว์แล้วเลือกรูปที่ถูก", desc:"สัตว์ 64 ชนิด พร้อมเสียงร้องของแต่ละตัว"},
+  {id:"vehicles", label:"ยานพาหนะ", icon:"🚗", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกยานพาหนะที่ถูก", desc:"รถและยานพาหนะที่เจอในชีวิตประจำวัน 33 ชนิด"},
+  {id:"instruments", label:"เครื่องดนตรี", icon:"🎸", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกเครื่องดนตรีที่ถูก", desc:"เครื่องดนตรีต่างๆ กลอง กีตาร์ เปียโน"},
+  {id:"nature", label:"ธรรมชาติ", icon:"🌈", type:"pic", group:"learn", prompt:"ฟังชื่อแล้วเลือกภาพที่ถูก", desc:"สิ่งต่างๆ ในธรรมชาติ ดวงอาทิตย์ เมฆ ฝน สายรุ้ง"},
+  {id:"jobs", label:"อาชีพ", icon:"👮", type:"pic", group:"learn", prompt:"ฟังชื่ออาชีพแล้วเลือกรูปที่ถูก", desc:"อาชีพต่างๆ 16 อาชีพ หมอ ตำรวจ ครู นักบิน"},
   // 🎮 เกม & กิจกรรม
-  {id:"daily", label:"กิจวัตรประจำวัน", icon:"🪥", type:"pic", group:"play", activity:true},
-  {id:"carjobs", label:"รถกับการใช้งาน", icon:"🚓", type:"pic", group:"play", prompt:"ฟังหน้าที่แล้วเลือกรถที่ถูก"},
-  {id:"carshop", label:"แต่งรถ", icon:"🖌️", group:"play", carshop:true},
-  {id:"cooking", label:"เกมทำอาหาร", icon:"🍳", group:"play", cooking:true},
-  {id:"shadow", label:"จับคู่เงา", icon:"🌑", group:"play", shadow:true},
-  {id:"scratch", label:"ขูดภาพระบายสี", icon:"🖍️", group:"play", scratch:true},
-  {id:"sorting", label:"แยกขยะ-เก็บของ", icon:"🗑️", group:"play", sorting:true},
-  {id:"peekaboo", label:"ซ่อนแอบสัตว์โลก", icon:"🌳", group:"play", peekaboo:true},
-  {id:"soundtap", label:"จิ้มทายเสียง", icon:"👆", group:"play", soundtap:true},
+  {id:"daily", label:"กิจวัตรประจำวัน", icon:"🪥", type:"pic", group:"play", activity:true, desc:"กิจวัตรประจำวัน กินข้าว อาบน้ำ แปรงฟัน แต่งตัว"},
+  {id:"carjobs", label:"รถกับการใช้งาน", icon:"🚓", type:"pic", group:"play", prompt:"ฟังหน้าที่แล้วเลือกรถที่ถูก", desc:"ฟังว่ารถแต่ละคันใช้ทำอะไร แล้วเลือกให้ถูก"},
+  {id:"itemjobs", label:"ของใช้ทำอะไร", icon:"🍽️", type:"pic", group:"play", prompt:"ฟังหน้าที่แล้วเลือกของที่ถูก", desc:"จาน ช้อน หวี กระจก ของใช้ในบ้านใช้ทำอะไร"},
+  {id:"carshop", label:"แต่งรถ", icon:"🖌️", group:"play", carshop:true, desc:"จิ้มถังสี แล้วแตะรถ เปลี่ยนสีได้ทันที"},
+  {id:"cooking", label:"เกมทำอาหาร", icon:"🍳", group:"play", cooking:true, desc:"เลือกวัตถุดิบ ปรุงเป็นเมนู แล้วกินหรือขาย"},
+  {id:"shadow", label:"จับคู่เงา", icon:"🌑", group:"play", shadow:true, desc:"ลากรูปไปวางทับเงาสีดำให้ตรงกัน"},
+  {id:"scratch", label:"ขูดภาพระบายสี", icon:"🖍️", group:"play", scratch:true, desc:"ถูหน้าจอเผยภาพสีสันที่ซ่อนอยู่"},
+  {id:"sorting", label:"แยกขยะ-เก็บของ", icon:"🗑️", group:"play", sorting:true, desc:"ลากขยะลงถังให้ถูกประเภท หรือเก็บของเล่นลงกล่อง"},
+  {id:"peekaboo", label:"ซ่อนแอบสัตว์โลก", icon:"🌳", group:"play", peekaboo:true, desc:"ฟังเสียงสัตว์ แล้วจิ้มพุ่มไม้ที่สัตว์ซ่อนอยู่"},
+  {id:"soundtap", label:"จิ้มทายเสียง", icon:"👆", group:"play", soundtap:true, desc:"ฟังเสียงร้อง แล้วจิ้มรูปสัตว์หรือรถให้ถูก"},
 ];
 
 /* --- cooking game data (free-play, Thai + international) --- */
@@ -913,6 +941,12 @@ function playCritter(kind){
   }
 }
 
+/* ================= VOICE: Microsoft Edge Neural TTS (pre-generated, self-hosted) =================
+   Every fixed phrase in the app is pre-synthesized offline with the real Edge Neural voices
+   (th-TH-PremwadeeNeural / en-US-AnaNeural) via scripts/generate_tts_batch.py, so this is the
+   default voice everywhere — no live network call, no CORS risk, works offline, instant playback.
+   Any text that isn't in the manifest (dynamic sentences with numbers, etc.) falls back to the
+   on-device Web Speech voice automatically. */
 let thaiVoice = null, enVoice = null;
 function pickVoice(){
   const voices = speechSynthesis.getVoices();
@@ -920,8 +954,28 @@ function pickVoice(){
   enVoice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith("en")) || null;
 }
 if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, withPop, lang){
-  if(withPop) sfx("pop");
+
+let ttsManifest = null;
+fetch("tts/manifest.json").then(r=>r.ok?r.json():null).then(m=>{ ttsManifest=m; }).catch(()=>{ ttsManifest=null; });
+const ttsAudioEl = new Audio();      // one reusable element, keeps iOS's "unlocked after first gesture" state
+ttsAudioEl.preload = "auto";
+
+function playEdgeVoice(text, lang){
+  if(!ttsManifest) return false;
+  const map = ttsManifest[lang==="en" ? "en" : "th"];
+  const fname = map && map[text];
+  if(!fname) return false;
+  try{
+    ttsAudioEl.pause();
+    ttsAudioEl.src = "tts/"+(lang==="en"?"en":"th")+"/"+fname;
+    ttsAudioEl.currentTime = 0;
+    ttsAudioEl.volume = 1;
+    const p = ttsAudioEl.play();
+    if(p && p.catch) p.catch(()=>speakWebFallback(text, lang));
+    return true;
+  }catch(e){ return false; }
+}
+function speakWebFallback(text, lang){
   if(!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
@@ -929,6 +983,11 @@ function speak(text, withPop, lang){
   else { u.lang="th-TH"; if(thaiVoice) u.voice=thaiVoice; }
   u.rate=0.85; u.pitch=1.1; u.volume=1;  // loudest
   speechSynthesis.speak(u);
+}
+function speak(text, withPop, lang){
+  if(withPop) sfx("pop");
+  if(playEdgeVoice(text, lang)) return;     // primary: pre-generated Edge Neural TTS
+  speakWebFallback(text, lang);             // fallback: on-device speech
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
 
@@ -1031,7 +1090,7 @@ GROUPS.forEach(gr=>{
     const b=document.createElement("button"); b.className="menu-card";
     const col=CARD_COLORS[i % CARD_COLORS.length];
     b.style.setProperty("--c",col); b.style.setProperty("--e","color-mix(in srgb, "+col+" 65%, #7a5a2a)");
-    b.innerHTML=`<span class="mi">${cat.icon}</span><span class="mt">${cat.label}</span>`;
+    b.innerHTML=`<span class="mi">${cat.icon}</span><span class="mtx"><span class="mt">${cat.label}</span>${cat.desc?`<span class="md">${cat.desc}</span>`:""}</span>`;
     b.addEventListener("click",()=>selectCat(cat.id));
     mg.appendChild(b);
   });
