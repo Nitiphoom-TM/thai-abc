@@ -202,6 +202,11 @@
   .card .pic-img{max-width:92px; margin:0 auto 2px;}
   .choice .pic-img{max-width:96px; margin:0 auto;}
   .ing .pic-img{max-width:50px; border-radius:11px;}
+  /* hand-drawn icon overrides: transparent, no photo-frame, styled like an emoji */
+  .pic-icon{width:auto; height:auto; object-fit:contain; display:block; margin:0 auto;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.18));}
+  .card .pic-icon{max-width:78px; max-height:64px; margin:0 auto 2px;}
+  .choice .pic-icon{max-width:84px; max-height:70px; margin:0 auto;}
 
   /* ---- 3D game ---- */
   .game{
@@ -563,7 +568,7 @@ const VEHICLES = [
   {n:"รถขยะ",e:"🚛"},{n:"รถยก",e:"🛻"},
   /* รถก่อสร้าง / การเกษตร (เด็กชอบ) */
   {n:"รถปูน",e:"🚚"},{n:"รถไถ",e:"🚜"},{n:"รถบด",e:"🚧"},{n:"รถเกี่ยวข้าว",e:"🚜"},
-  {n:"รถขุด",e:"🏗️"},{n:"รถตักดิน",e:"🏗️"},{n:"รถเครน",e:"🏗️"},
+  {n:"รถขุด",e:"🏗️"},{n:"แม็คโคร",e:"🏗️"},{n:"รถเครน",e:"🏗️"},
   /* รถไฟ / ราง */
   {n:"รถไฟ",e:"🚆"},{n:"รถไฟฟ้า",e:"🚈"},{n:"รถไฟไอน้ำ",e:"🚂"},
   /* บิน / น้ำ */
@@ -664,7 +669,7 @@ const CARJOBS = [
   {n:"รถขยะ",e:"🚛",use:"เก็บขยะไปทิ้ง"},{n:"รถยก",e:"🛻",use:"ลากรถที่เสียไปซ่อม"},
   {n:"รถปูน",e:"🚚",use:"ผสมปูนไปสร้างบ้าน"},{n:"รถไถ",e:"🚜",use:"ทำไร่ทำนา"},
   {n:"รถบด",e:"🚧",use:"บดถนนให้เรียบ"},{n:"รถเกี่ยวข้าว",e:"🚜",use:"เกี่ยวข้าวในนา"},
-  {n:"รถขุด",e:"🏗️",use:"ขุดดินก่อสร้าง"},{n:"รถตักดิน",e:"🏗️",use:"ตักดินตักทราย"},
+  {n:"รถขุด",e:"🏗️",use:"ขุดดินก่อสร้าง"},{n:"แม็คโคร",e:"🏗️",use:"ตักดินตักทราย"},
   {n:"รถเครน",e:"🏗️",use:"ยกของหนักขึ้นที่สูง"},{n:"รถไฟ",e:"🚆",use:"วิ่งไปบนราง"},
   {n:"รถไฟฟ้า",e:"🚈",use:"พาคนไปทำงานในเมือง"},{n:"รถไฟไอน้ำ",e:"🚂",use:"วิ่งพ่นควันปู๊นๆ"},
   {n:"เครื่องบิน",e:"✈️",use:"บินไปเที่ยวเมืองไกลๆ"},{n:"เฮลิคอปเตอร์",e:"🚁",use:"บินช่วยเหลือคน"},
@@ -1023,24 +1028,28 @@ function emojiImgURL(e){
 /* photos disabled category-wide — kids prefer the cartoon emoji icons, and they're instant + tiny.
    (emoji rendering everywhere via the fallback path; add a category id here to re-enable photos for it.) */
 const PHOTO_CATS = new Set([]);
-/* per-item overrides: some vehicle emoji are reused/misleading (excavator, loader, road roller,
-   crane, and a "party balloon" standing in for a hot-air balloon all had no distinct native emoji),
-   so these specific items use a real self-hosted photo instead, regardless of category. */
-const PHOTO_OVERRIDES = new Set([]);   // kids prefer emoji icons — kept as an empty hook for future use
-function hasPhoto(catId, key){ return PHOTO_CATS.has(catId) || (key!=null && PHOTO_OVERRIDES.has(key)); }
+/* hand-drawn flat-cartoon icon overrides: Unicode (and every open emoji set, incl. OpenMoji's 4500+)
+   has no distinct excavator/backhoe-loader/road-roller/crane-truck/hot-air-balloon glyph — they all
+   collapse onto the same 🏗️/🚧/🎈. These 5 are custom-drawn (images/icons/) in the app's own flat
+   pastel style so each one is visually distinct, styled like an emoji (transparent, no photo frame). */
+const ICON_OVERRIDES = new Set(["รถขุด","แม็คโคร","รถบด","รถเครน","บอลลูน"]);
+function hasPhoto(catId, key){ return PHOTO_CATS.has(catId) || (key!=null && ICON_OVERRIDES.has(key)); }
 function photoSrc(catId, key){
-  if(PHOTO_OVERRIDES.has(key)) return "images/special/"+encodeURIComponent(key)+".jpg";
+  if(ICON_OVERRIDES.has(key)) return "images/icons/"+encodeURIComponent(key)+".png";
   return "images/"+catId+"/"+encodeURIComponent(key)+".jpg";
 }
-/* returns HTML: an <img> when a photo exists for this item, else an emoji <span>.
-   call attachFallback(rootEl) after inserting so a missing photo swaps to the emoji. */
+/* returns HTML: an <img> when a photo/icon exists for this item, else an emoji <span>.
+   call attachFallback(rootEl) after inserting so a missing image swaps to the emoji. */
 function mediaHTML(catId, key, emoji, spanCls){
   spanCls = spanCls || "emoji";
-  if(hasPhoto(catId, key)) return `<img class="pic-img" loading="lazy" alt="" src="${photoSrc(catId,key)}" data-e="${emoji}" data-cls="${spanCls}">`;
+  if(hasPhoto(catId, key)){
+    const cls = ICON_OVERRIDES.has(key) ? "pic-icon" : "pic-img";
+    return `<img class="${cls}" loading="lazy" alt="" src="${photoSrc(catId,key)}" data-e="${emoji}" data-cls="${spanCls}">`;
+  }
   return `<span class="${spanCls}">${emoji}</span>`;
 }
 function attachFallback(root){
-  root.querySelectorAll("img.pic-img").forEach(img=>{
+  root.querySelectorAll("img.pic-img, img.pic-icon").forEach(img=>{
     img.onerror=()=>{ const s=document.createElement("span"); s.className=img.dataset.cls||"emoji"; s.textContent=img.dataset.e||""; img.replaceWith(s); };
   });
 }
@@ -1320,8 +1329,10 @@ const Viewer = (function(){
     img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain"; img.alt="";
     const twemoji="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+emojiCP(emoji)+".svg";
     const usePhoto = hasPhoto(catId, key);
-    img.onerror=()=>{ if(img.src.indexOf("twemoji")<0 && usePhoto){ img.style.objectFit="cover"; img.src=twemoji; } else { art.classList.add("imgfont"); art.textContent=emoji; } };
-    if(usePhoto){ img.style.objectFit="cover"; img.style.borderRadius="18px"; img.src=photoSrc(catId,key); }
+    const isIcon = ICON_OVERRIDES.has(key);
+    img.onerror=()=>{ if(img.src.indexOf("twemoji")<0 && usePhoto){ img.style.objectFit="contain"; img.style.borderRadius="0"; img.src=twemoji; } else { art.classList.add("imgfont"); art.textContent=emoji; } };
+    if(usePhoto && isIcon){ img.style.objectFit="contain"; img.src=photoSrc(catId,key); }
+    else if(usePhoto){ img.style.objectFit="cover"; img.style.borderRadius="18px"; img.src=photoSrc(catId,key); }
     else { img.src=twemoji; }
     art.appendChild(img);
   }
