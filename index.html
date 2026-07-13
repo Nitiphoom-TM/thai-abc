@@ -1026,7 +1026,7 @@ const PHOTO_CATS = new Set([]);
 /* per-item overrides: some vehicle emoji are reused/misleading (excavator, loader, road roller,
    crane, and a "party balloon" standing in for a hot-air balloon all had no distinct native emoji),
    so these specific items use a real self-hosted photo instead, regardless of category. */
-const PHOTO_OVERRIDES = new Set(["รถขุด","รถตักดิน","รถบด","รถเครน","บอลลูน"]);
+const PHOTO_OVERRIDES = new Set([]);   // kids prefer emoji icons — kept as an empty hook for future use
 function hasPhoto(catId, key){ return PHOTO_CATS.has(catId) || (key!=null && PHOTO_OVERRIDES.has(key)); }
 function photoSrc(catId, key){
   if(PHOTO_OVERRIDES.has(key)) return "images/special/"+encodeURIComponent(key)+".jpg";
