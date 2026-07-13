@@ -1020,16 +1020,23 @@ function emojiImgURL(e){
 }
 
 /* ---- real photos (self-hosted), with emoji fallback ---- */
-/* photos disabled — kids prefer the cartoon emoji icons, and they're instant + tiny.
+/* photos disabled category-wide — kids prefer the cartoon emoji icons, and they're instant + tiny.
    (emoji rendering everywhere via the fallback path; add a category id here to re-enable photos for it.) */
 const PHOTO_CATS = new Set([]);
-function hasPhoto(catId){ return PHOTO_CATS.has(catId); }
-function photoSrc(catId, key){ return "images/"+catId+"/"+encodeURIComponent(key)+".jpg"; }
-/* returns HTML: an <img> when a photo exists for this category, else an emoji <span>.
+/* per-item overrides: some vehicle emoji are reused/misleading (excavator, loader, road roller,
+   crane, and a "party balloon" standing in for a hot-air balloon all had no distinct native emoji),
+   so these specific items use a real self-hosted photo instead, regardless of category. */
+const PHOTO_OVERRIDES = new Set(["รถขุด","รถตักดิน","รถบด","รถเครน","บอลลูน"]);
+function hasPhoto(catId, key){ return PHOTO_CATS.has(catId) || (key!=null && PHOTO_OVERRIDES.has(key)); }
+function photoSrc(catId, key){
+  if(PHOTO_OVERRIDES.has(key)) return "images/special/"+encodeURIComponent(key)+".jpg";
+  return "images/"+catId+"/"+encodeURIComponent(key)+".jpg";
+}
+/* returns HTML: an <img> when a photo exists for this item, else an emoji <span>.
    call attachFallback(rootEl) after inserting so a missing photo swaps to the emoji. */
 function mediaHTML(catId, key, emoji, spanCls){
   spanCls = spanCls || "emoji";
-  if(hasPhoto(catId)) return `<img class="pic-img" loading="lazy" alt="" src="${photoSrc(catId,key)}" data-e="${emoji}" data-cls="${spanCls}">`;
+  if(hasPhoto(catId, key)) return `<img class="pic-img" loading="lazy" alt="" src="${photoSrc(catId,key)}" data-e="${emoji}" data-cls="${spanCls}">`;
   return `<span class="${spanCls}">${emoji}</span>`;
 }
 function attachFallback(root){
@@ -1131,7 +1138,7 @@ CATEGORIES.forEach(cat=>{
       b.innerHTML = mediaHTML(cat.id,item.key,item.emoji)+`<span class="big">${item.big}</span><span class="label">${item.label}</span>`;
     }else{
       b.innerHTML = mediaHTML(cat.id,item.key,item.emoji,"emoji")+`<span class="label">${item.label}</span>`;
-      if(!hasPhoto(cat.id)) b.querySelector(".emoji").style.fontSize="clamp(2.6rem,12vw,3.6rem)";
+      if(!hasPhoto(cat.id,item.key)) b.querySelector(".emoji").style.fontSize="clamp(2.6rem,12vw,3.6rem)";
     }
     attachFallback(b);
     b.addEventListener("click", ()=>{
@@ -1188,7 +1195,7 @@ function startRound(catId){
     const b=document.createElement("button"); b.className="choice"; b.dataset.key=item.key;
     if(g.cat.type!=="pic"){
       b.innerHTML = `<span class="big">${item.big}</span>`+mediaHTML(g.cat.id,item.key,item.emoji);
-      if(!hasPhoto(g.cat.id)) b.querySelector(".emoji").style.fontSize="clamp(1.5rem,6vw,2rem)";
+      if(!hasPhoto(g.cat.id,item.key)) b.querySelector(".emoji").style.fontSize="clamp(1.5rem,6vw,2rem)";
     }else{
       b.innerHTML = mediaHTML(g.cat.id,item.key,item.emoji);
     }
@@ -1312,7 +1319,7 @@ const Viewer = (function(){
     const img=new Image();
     img.style.width="100%"; img.style.height="100%"; img.style.objectFit="contain"; img.alt="";
     const twemoji="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/"+emojiCP(emoji)+".svg";
-    const usePhoto = catId && hasPhoto(catId);
+    const usePhoto = hasPhoto(catId, key);
     img.onerror=()=>{ if(img.src.indexOf("twemoji")<0 && usePhoto){ img.style.objectFit="cover"; img.src=twemoji; } else { art.classList.add("imgfont"); art.textContent=emoji; } };
     if(usePhoto){ img.style.objectFit="cover"; img.style.borderRadius="18px"; img.src=photoSrc(catId,key); }
     else { img.src=twemoji; }
